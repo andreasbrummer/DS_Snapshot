@@ -20,7 +20,7 @@ public class DistributedSnapshot{
 
     private List<SocketAddress> input_nodes = new ArrayList<SocketAddress>();
     private Snapshot snapshot;//poi diventera una lista
-    private Storage storage = new Storage("snapshotsStored");
+    private final Storage storage = new Storage();
 
     //per tenere la lista di tutti i nodi a cui sono connesso. output_nodes.getPort(), ...getInetAddress() per l IP
     Map<UUID,Socket> output_nodes = new HashMap<>();
@@ -134,6 +134,7 @@ public class DistributedSnapshot{
                         snapshotRunning = true;
 
                         //creo lo snapshot e salvo lo stato
+                        //mettere l'UUID del marker ricevuto
                         snapshot = new Snapshot(UUID.randomUUID(), status,input_nodes);
                         //blocco salvataggio da quel canale
                         if(snapshot.remove_from_node_address_list(clientSocket.getRemoteSocketAddress())){
@@ -167,7 +168,7 @@ public class DistributedSnapshot{
                     //out.writeObject(outputObject);
                     //out.flush();
 
-                    clientSocket.close();
+                    //clientSocket.close();
                 }
             } catch (IOException e) {
                 System.out.println("chiuso il socket");

@@ -4,8 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="aggiunta la logica" />
-    <list id="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" name="Changes by caser" comment="" />
+    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="aggiunta la logica">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/SenderMessageTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/SenderMessageTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/Storage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Storage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/SenderMessageTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/SenderMessageTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Storage.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/main.class" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -25,6 +35,19 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="8f50a126-4f1b-4332-af79-dfab72d0446c" />
+        <option name="url" value="https://github.com/andreasbrummer/DS_Snapshot.git" />
+      </UrlAndAccount>
+    </option>
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -47,6 +70,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "TODO_SCOPE": "All Places",
     "WebServerToolWindowFactoryState": "false",
     "last_opened_file_path": "/home/andreas/Desktop/DS/DS_project/DS_Snapshot",
     "node.js.detected.package.eslint": "true",
@@ -77,7 +101,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1678636215082</updated>
-      <workItem from="1678636216222" duration="11840000" />
+      <workItem from="1678636216222" duration="13654000" />
     </task>
     <task id="LOCAL-00001" summary="First commit">
       <created>1678636834719</created>
@@ -100,7 +124,14 @@
       <option name="project" value="LOCAL" />
       <updated>1678643342347</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="aggiunta la logica">
+      <created>1678648250873</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1678648250873</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -140,5 +171,15 @@
     <MESSAGE value="implementata la logica" />
     <MESSAGE value="aggiunta la logica" />
     <option name="LAST_COMMIT_MESSAGE" value="aggiunta la logica" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="java.net.SocketException" package="java.net" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

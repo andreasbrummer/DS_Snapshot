@@ -16,14 +16,15 @@ public class Storage {
     private String folderName = "snapshots";
 
     // used to set the folder name
-    public Storage(String folderName) {
-        this.folderName = folderName;
+    public Storage() {
+        createFolder(folderName);
     }
     public static void createFolder(String folderName) {
         try {
             Path path = Paths.get(folderName);
             if (!Files.exists(path)) {
                 try {
+                    System.out.println("Creating folder");
                     Files.createDirectory(path);
                 } catch (FileAlreadyExistsException ignored) {}
             }

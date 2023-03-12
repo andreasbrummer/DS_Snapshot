@@ -15,8 +15,8 @@ public class SenderMessageTest {
         ds.init();
 
 
-        InetAddress ipAddress = InetAddress.getByName("192.168.121.239");
-        int port = 43731; //harcodare qui la porta del nodo server
+        InetAddress ipAddress = InetAddress.getByName("192.168.1.11");
+        int port = 10514; //harcodare qui la porta del nodo server
         String node1 = ds.installNewConnectionToNode(ipAddress,port );
         System.out.println("Connessione installata");
 
