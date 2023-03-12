@@ -1,22 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DS_Snapshot.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Messages/Marker.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Messages/SnapEnum.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Messages/SnapMsg.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/SnapshotLibrary/SenderMessageTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/SnapshotLibrary/SnapshotNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Storage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main.java" afterDir="false" />
+    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="First commit">
+      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/SnapshotNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/SnapshotNode.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,7 +16,22 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="Andreas" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="useMavenConfig" value="true" />
+      </MavenGeneralSettings>
+    </option>
   </component>
   <component name="ProjectId" id="2Mv7TxseNnSRH2Fi9zPz0pHUdhy" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -37,7 +44,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/home/andreas/Desktop/DS/DS_project/DS_Snapshot/src",
+    "last_opened_file_path": "/home/andreas/Desktop/DS/DS_project/DS_Snapshot",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -50,6 +57,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/src" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
@@ -64,8 +72,16 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1678636215082</updated>
-      <workItem from="1678636216222" duration="419000" />
+      <workItem from="1678636216222" duration="1544000" />
     </task>
+    <task id="LOCAL-00001" summary="First commit">
+      <created>1678636834719</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1678636834719</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -76,10 +92,31 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="CUSTOM_BOOLEAN_PROPERTIES">
+                <map>
+                  <entry key="Show.Git.Branches" value="true" />
+                </map>
+              </option>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/master" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="First commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="First commit" />
   </component>
 </project>

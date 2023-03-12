@@ -19,11 +19,11 @@ import java.util.stream.Collectors;
  */
 public abstract class SnapshotNode {
 
-    @NonNull protected UUID lastSnapshotID;
-    @NonNull protected Serializable status;
-    @NonNull protected Set<InetAddress> connectedNodes;
-    @NonNull protected Map<UUID, Map<InetAddress, List<SnapMsg>>> receivedMessages;
-    @NonNull protected Map<UUID, Map<InetAddress, Boolean>> receivedMarkers;
+     protected UUID lastSnapshotID;
+     protected Serializable status;
+     protected Set<InetAddress> connectedNodes;
+     protected Map<UUID, Map<InetAddress, List<SnapMsg>>> receivedMessages;
+     protected Map<UUID, Map<InetAddress, Boolean>> receivedMarkers;
 
     public SnapshotNode() {
         connectedNodes = new HashSet<>();

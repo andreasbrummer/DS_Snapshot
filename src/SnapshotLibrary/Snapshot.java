@@ -1,24 +1,23 @@
 package SnapshotLibrary;
 
 import SnapshotLibrary.Messages.SnapMsg;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.*;
 
 public class Snapshot implements Serializable {
-    @NonNull
+
     private final UUID snapshotId;
-    @NonNull
+
     private final Serializable status;
-    private final @NonNull Map<InetAddress, List<SnapMsg>> messages;
+    private final  Map<InetAddress, List<SnapMsg>> messages;
 
 
 
-    public Snapshot(@NonNull UUID snapshotId,
-                    @NonNull Serializable status,
-                    @NonNull Map<InetAddress, List<SnapMsg>> messages) {
+    public Snapshot( UUID snapshotId,
+                     Serializable status,
+                     Map<InetAddress, List<SnapMsg>> messages) {
         this.snapshotId = snapshotId;
         this.status = status;
         this.messages = messages;
