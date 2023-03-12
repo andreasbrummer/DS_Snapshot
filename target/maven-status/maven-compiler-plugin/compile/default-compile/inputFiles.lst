@@ -1,0 +1,17 @@
+/home/andreas/Desktop/DS_project/src/main/java/Node/Node.java
+/home/andreas/Desktop/DS_project/src/main/java/Node/NodeInterface.java
+/home/andreas/Desktop/DS_project/src/main/java/Messages/InitConnectionMsg.java
+/home/andreas/Desktop/DS_project/src/main/java/SnapshotLibrary/SnapshotNode.java
+/home/andreas/Desktop/DS_project/src/main/java/Messages/NodeForDistributedSnapshotMsg.java
+/home/andreas/Desktop/DS_project/src/main/java/SnapshotLibrary/SavedLocalSnapshot.java
+/home/andreas/Desktop/DS_project/src/main/java/Messages/JoinMsg.java
+/home/andreas/Desktop/DS_project/src/main/java/main.java
+/home/andreas/Desktop/DS_project/src/main/java/SnapshotLibrary/Messages/Marker.java
+/home/andreas/Desktop/DS_project/src/main/java/Node/NodeReceiver.java
+/home/andreas/Desktop/DS_project/src/main/java/Relay/RelayServer.java
+/home/andreas/Desktop/DS_project/src/main/java/SnapshotLibrary/Messages/SnapMsg.java
+/home/andreas/Desktop/DS_project/src/main/java/interfaces/LocalAddress.java
+/home/andreas/Desktop/DS_project/src/main/java/Relay/NodeConnection.java
+/home/andreas/Desktop/DS_project/src/main/java/Relay/NodeDiscover.java
+/home/andreas/Desktop/DS_project/src/main/java/Messages/MsgType.java
+/home/andreas/Desktop/DS_project/src/main/java/SnapshotLibrary/Messages/SnapEnum.java

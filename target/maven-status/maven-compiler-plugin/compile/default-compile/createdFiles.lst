@@ -1,0 +1,15 @@
+SnapshotLibrary/Messages/SnapMsg.class
+Relay/RelayServer.class
+SnapshotLibrary/SavedLocalSnapshot.class
+SnapshotLibrary/Messages/Marker.class
+SnapshotLibrary/SnapshotNode.class
+Messages/InitConnectionMsg.class
+interfaces/LocalAddress.class
+Messages/MsgType.class
+Relay/NodeDiscover.class
+Messages/JoinMsg.class
+Messages/NodeForDistributedSnapshotMsg.class
+Node/NodeInterface.class
+SnapshotLibrary/Messages/SnapEnum.class
+Node/NodeReceiver.class
+Relay/NodeConnection.class

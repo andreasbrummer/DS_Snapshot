@@ -1,63 +1,60 @@
 package SnapshotLibrary;
 
 import SnapshotLibrary.Messages.SnapMsg;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.*;
 
 public class Snapshot implements Serializable {
 
-    private final UUID snapshotId;
+    private  UUID snapshotId = null;
 
-    private final Serializable status;
-    private final  Map<InetAddress, List<SnapMsg>> messages;
+    private  Serializable status = null;
+    private List<Pair<SocketAddress,SnapMsg>> node_messages_List = new ArrayList<Pair<SocketAddress,SnapMsg>>();
+    private List<SocketAddress> connected_nodes = new ArrayList<SocketAddress>(); //contiene gli incoming nodes quando faccio partire lo snapshot
 
 
 
     public Snapshot(UUID snapshotId,
-                    Serializable status, Map<InetAddress, List<SnapMsg>> messages) {
+                    Serializable status, List<SocketAddress> connected_nodes) {
         this.snapshotId = snapshotId;
         this.status = status;
-        this.messages = messages;
+        this.connected_nodes = connected_nodes;
     }
 
+    public boolean remove_from_node_address_list(SocketAddress node_address){
+        connected_nodes.remove(node_address);
+        return connected_nodes.isEmpty();
+    }
+    public List<SocketAddress> getConnected_nodes() {
+        return connected_nodes;
+    }
     public Serializable getStatus() {
         return status;
     }
 
-    public Map<InetAddress, List<SnapMsg>> getMessages() {
-        return new HashMap<>(messages);
-    }
 
-    public Set<InetAddress> getConnectedNodes() {
-        return messages.keySet();
-    }
 
     public UUID getSnapshotId() {
         return snapshotId;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Snapshot snapshot)) return false;
-        return getSnapshotId().equals(snapshot.getSnapshotId()) && getStatus().equals(snapshot.getStatus()) && getMessages().equals(snapshot.getMessages());
+    public List<Pair<SocketAddress,SnapMsg>> getNode_messages_List() {
+        return node_messages_List;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(getSnapshotId(), getStatus(), getMessages());
+    public void addNode_messages_List(SocketAddress nodeID, SnapMsg msg) {
+        this.node_messages_List.add(Pair.of(nodeID, msg));
     }
 
-    @Override
-    public String toString() {
-        return "SavedLocalSnapshot{\n" +
-                "\tsnapshotId=" + snapshotId +
-                ",\n\tstatus=" + status +
-                ",\n\tmessages=" + messages +
-                "\n}";
+    public void print_snapshot(){
+        System.out.println("Snapshot ID: " + snapshotId);
+        System.out.println("Status: " + status);
+        System.out.println("Connected nodes: " + connected_nodes);
+        System.out.println("Node messages: " + node_messages_List);
     }
-
-
 }

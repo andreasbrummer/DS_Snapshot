@@ -4,15 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="Aggiunto pom.xml">
+    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="aggiunta la logica">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/SenderMessageTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/SenderMessageTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/SnapshotNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/SnapshotNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/SnapshotNode.java" beforeDir="false" />
     </list>
     <list id="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" name="Changes by caser" comment="">
       <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,15 +31,31 @@
   <component name="LineStatusTrackerManager">
     <file path="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java">
       <ranges>
-        <range start1="7" end1="7" start2="7" end2="8" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="16" end1="17" start2="17" end2="19" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="21" end1="21" start2="23" end2="25" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
-        <range start1="106" end1="107" start2="110" end2="111" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="112" end1="113" start2="116" end2="120" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
-        <range start1="114" end1="114" start2="121" end2="136" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
-        <range start1="119" end1="120" start2="141" end2="141" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
-        <range start1="121" end1="127" start2="142" end2="150" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
-        <range start1="128" end1="129" start2="151" end2="152" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="3" end1="3" start2="3" end2="4" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="11" end1="14" start2="12" end2="14" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="19" end1="19" start2="19" end2="23" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="23" end1="23" start2="27" end2="29" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
+        <range start1="70" end1="70" start2="76" end2="77" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
+        <range start1="114" end1="115" start2="121" end2="131" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
+        <range start1="116" end1="116" start2="132" end2="163" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
+        <range start1="121" end1="122" start2="168" end2="168" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
+        <range start1="123" end1="129" start2="169" end2="178" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
+      </ranges>
+    </file>
+    <file path="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java">
+      <ranges>
+        <range start1="3" end1="3" start2="3" end2="4" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="6" end1="6" start2="7" end2="9" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="10" end1="11" start2="13" end2="14" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="12" end1="14" start2="15" end2="18" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="18" end1="19" start2="22" end2="23" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="21" end1="22" start2="25" end2="26" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="24" end1="24" start2="28" end2="35" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
+        <range start1="28" end1="31" start2="39" end2="39" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="32" end1="35" start2="40" end2="40" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="40" end1="50" start2="45" end2="47" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="52" end1="59" start2="49" end2="51" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="61" end1="62" start2="53" end2="59" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
       </ranges>
     </file>
   </component>
@@ -92,7 +109,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1678636215082</updated>
-      <workItem from="1678636216222" duration="6930000" />
+      <workItem from="1678636216222" duration="11346000" />
     </task>
     <task id="LOCAL-00001" summary="First commit">
       <created>1678636834719</created>
@@ -108,7 +125,14 @@
       <option name="project" value="LOCAL" />
       <updated>1678637913171</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="aggiunta la logica">
+      <created>1678643342346</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1678643342347</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -145,6 +169,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="First commit" />
     <MESSAGE value="Aggiunto pom.xml" />
-    <option name="LAST_COMMIT_MESSAGE" value="Aggiunto pom.xml" />
+    <MESSAGE value="implementata la logica" />
+    <MESSAGE value="aggiunta la logica" />
+    <option name="LAST_COMMIT_MESSAGE" value="aggiunta la logica" />
   </component>
 </project>

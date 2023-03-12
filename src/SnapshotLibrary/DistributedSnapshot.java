@@ -1,6 +1,7 @@
 package SnapshotLibrary;
 
 import SnapshotLibrary.Messages.Marker;
+import SnapshotLibrary.Messages.SnapMsg;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,18 +10,23 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.net.SocketAddress;
+import java.util.*;
 
 public class DistributedSnapshot{
     private int serverPortNumber;
     private Serializable status;
     private Server server;
 
+    private List<SocketAddress> input_nodes = new ArrayList<SocketAddress>();
+    private Snapshot snapshot;//poi diventera una lista
+    private Storage storage = new Storage("snapshotsStored");
+
     //per tenere la lista di tutti i nodi a cui sono connesso. output_nodes.getPort(), ...getInetAddress() per l IP
     Map<UUID,Socket> output_nodes = new HashMap<>();
     Map<UUID,ObjectOutputStream> output_stream = new HashMap<>();
+    //verrà sostiuito con un array di snapshot che sono anche quelli in corso
+    private boolean snapshotRunning = false;
 
     public void init() throws IOException {
         server = new Server();
@@ -68,6 +74,7 @@ public class DistributedSnapshot{
                     while (running) {
                         try {
                             Socket socket = serverSocket.accept();
+                            input_nodes.add(socket.getRemoteSocketAddress());
                             // Gestisci la connessione del client qui:
                             System.out.println("Nuova connessione stabilita con:" + socket.getInetAddress() + " port:" + socket.getPort());
                             new Thread(new NodeHandler(socket)).start();
@@ -112,21 +119,63 @@ public class DistributedSnapshot{
                 while ((inputObject = in.readObject()) != null) {
                     System.out.println("ricevuto messaggio: " + inputObject);
                     // Elabora l'oggetto qui
-                    if(inputObject instanceof Marker){
+                    if (inputObject instanceof Marker && snapshotRunning) {
+                        //CASO GIA INIZIATO: SMETTO DI SALVARE I MESSAGGI DA QUEL CANALE + CONTROLLO SNAPSHOT FINITO
+                        if(snapshot.remove_from_node_address_list(clientSocket.getRemoteSocketAddress())){
+                            storage.storeSnapshot(snapshot);
+                            snapshotRunning=false;
+                            //test
+                            snapshot.print_snapshot();
+                        }
+                    } else if (inputObject instanceof Marker && !snapshotRunning) {
+                        //CASO INIZIO LO SNAPSHOT: SALVO LO STATO E BLOCCO SALVATAGGIO DA QUEL CANALE, SALVO MESSAGGI DAGLI ALTRI CANALI E INVIO MARKER A TUTTI output_socket
                         System.out.println("INIZIO LO SNAPSHOT");
+                        //attivo registrazione
+                        snapshotRunning = true;
+
+                        //creo lo snapshot e salvo lo stato
+                        snapshot = new Snapshot(UUID.randomUUID(), status,input_nodes);
+                        //blocco salvataggio da quel canale
+                        if(snapshot.remove_from_node_address_list(clientSocket.getRemoteSocketAddress())){
+                            storage.storeSnapshot(snapshot);
+                            snapshotRunning=false;
+                            //test
+                            snapshot.print_snapshot();
+                        }
+
+                        //inoltro i marker ai miei outgoing channels (mettendo l UUID del marker ricevuto)
+                        Object finalInputObject = inputObject;
+                        output_nodes.forEach((k, v)->{
+                            try {
+                                output_stream.get(k).writeObject(new Marker(((Marker) finalInputObject).getSnapshotId()));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+
+                        //qui metto una lista di snaphot, la lista é una variabile globale.
+
+                    } else if (snapshotRunning) { //no marker
+                        if(snapshot.getConnected_nodes().contains(clientSocket.getRemoteSocketAddress())){
+                            snapshot.addNode_messages_List(clientSocket.getRemoteSocketAddress(),(SnapMsg) inputObject); }
+                    } else { //not snapshot running, no marker
+                        System.out.println("non salvo i messaggi che ricevo");
+                        //non salvo i messaggi che ricevo
                     }
                     //Serializable outputObject = ...; // Crea l'oggetto di risposta
 
                     //out.writeObject(outputObject);
                     //out.flush();
-                }
 
-                clientSocket.close();
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
+                    clientSocket.close();
+                }
+            } catch (IOException e) {
+                System.out.println("chiuso il socket");
+                throw new RuntimeException(e);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
             }
         }
-    }
 
     }
 }

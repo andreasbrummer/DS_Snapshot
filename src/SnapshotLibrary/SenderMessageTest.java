@@ -26,8 +26,8 @@ public class SenderMessageTest {
                 // Qui si assume che l'oggetto sia di tipo String, ma è possibile utilizzare qualsiasi altro tipo di oggetto
                 Object object = reader.readLine();
                 if(object.equals("marker")){
-                    object = new Marker(UUID.randomUUID());
-
+                    UUID snapId = UUID.randomUUID();
+                    object = new Marker(snapId);
                 }
                 ds.sendMessage(node1,object);
       }
