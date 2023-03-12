@@ -15,9 +15,8 @@ public class Snapshot implements Serializable {
 
 
 
-    public Snapshot( UUID snapshotId,
-                     Serializable status,
-                     Map<InetAddress, List<SnapMsg>> messages) {
+    public Snapshot(UUID snapshotId,
+                    Serializable status, Map<InetAddress, List<SnapMsg>> messages) {
         this.snapshotId = snapshotId;
         this.status = status;
         this.messages = messages;
@@ -59,4 +58,6 @@ public class Snapshot implements Serializable {
                 ",\n\tmessages=" + messages +
                 "\n}";
     }
+
+
 }

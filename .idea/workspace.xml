@@ -4,11 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="First commit">
-      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="Aggiunto pom.xml">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/SenderMessageTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/SenderMessageTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/SnapshotNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/SnapshotNode.java" afterDir="false" />
+    </list>
+    <list id="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" name="Changes by caser" comment="">
+      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,6 +26,21 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="LineStatusTrackerManager">
+    <file path="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java">
+      <ranges>
+        <range start1="7" end1="7" start2="7" end2="8" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="16" end1="17" start2="17" end2="19" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="21" end1="21" start2="23" end2="25" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
+        <range start1="106" end1="107" start2="110" end2="111" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="112" end1="113" start2="116" end2="120" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
+        <range start1="114" end1="114" start2="121" end2="136" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
+        <range start1="119" end1="120" start2="141" end2="141" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
+        <range start1="121" end1="127" start2="142" end2="150" changelist="88f275c9-98f3-46f8-b5ac-2a5ba4c427b3" />
+        <range start1="128" end1="129" start2="151" end2="152" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+      </ranges>
+    </file>
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -43,6 +62,7 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
     "last_opened_file_path": "/home/andreas/Desktop/DS/DS_project/DS_Snapshot",
     "node.js.detected.package.eslint": "true",
@@ -72,7 +92,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1678636215082</updated>
-      <workItem from="1678636216222" duration="1544000" />
+      <workItem from="1678636216222" duration="6930000" />
     </task>
     <task id="LOCAL-00001" summary="First commit">
       <created>1678636834719</created>
@@ -81,7 +101,14 @@
       <option name="project" value="LOCAL" />
       <updated>1678636834719</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Aggiunto pom.xml">
+      <created>1678637913171</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1678637913171</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -117,6 +144,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="First commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="First commit" />
+    <MESSAGE value="Aggiunto pom.xml" />
+    <option name="LAST_COMMIT_MESSAGE" value="Aggiunto pom.xml" />
   </component>
 </project>

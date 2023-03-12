@@ -6,12 +6,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.util.LinkedHashMap;
 import java.util.UUID;
 
 public class SenderMessageTest {
     public static void main(String[] args) throws IOException {
         DistributedSnapshot ds = new DistributedSnapshot();
         ds.init();
+
 
         InetAddress ipAddress = InetAddress.getByName("192.168.121.239");
         int port = 43731; //harcodare qui la porta del nodo server

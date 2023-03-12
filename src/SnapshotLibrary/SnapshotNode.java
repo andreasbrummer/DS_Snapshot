@@ -3,7 +3,6 @@ package SnapshotLibrary;
 import SnapshotLibrary.Messages.Marker;
 import SnapshotLibrary.Messages.SnapMsg;
 import org.apache.commons.lang3.SerializationUtils;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -53,7 +52,7 @@ public abstract class SnapshotNode {
             } else {
                 receivedMarkers.get(snapshotId).put(sender, true);
                 if (receivedMarkers.get(snapshotId).entrySet().stream().allMatch(Map.Entry::getValue)) {
-                    Serializable localSnapshot  = new Snapshot(snapshotId, status, receivedMessages.get(snapshotId));
+                    Serializable localSnapshot  = new Snapshot(snapshotId, status, messages);
                     try (FileOutputStream out = new FileOutputStream("snapshot_" + snapshotId.toString())) {
                         out.write(SerializationUtils.serialize(localSnapshot));
                     } catch (IOException e) {

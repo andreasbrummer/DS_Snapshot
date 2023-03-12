@@ -5,6 +5,7 @@ import SnapshotLibrary.Messages.Marker;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -14,7 +15,8 @@ import java.util.UUID;
 
 public class DistributedSnapshot{
     private int serverPortNumber;
-    Server server;
+    private Serializable status;
+    private Server server;
 
     //per tenere la lista di tutti i nodi a cui sono connesso. output_nodes.getPort(), ...getInetAddress() per l IP
     Map<UUID,Socket> output_nodes = new HashMap<>();
@@ -104,7 +106,7 @@ public class DistributedSnapshot{
         public void run() {
             try {
                 ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
-                ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
+                //ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
 
                 Object inputObject;
                 while ((inputObject = in.readObject()) != null) {
@@ -126,7 +128,7 @@ public class DistributedSnapshot{
         }
     }
 
-
+    }
 }
 
 
