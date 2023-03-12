@@ -4,13 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="modificato il main">
+    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="aggiunto startSnapshot">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/SenderMessageTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/SenderMessageTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/SenderMessageTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/SenderMessageTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Snapshot.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Snapshot.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -97,7 +100,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1678636215082</updated>
-      <workItem from="1678636216222" duration="15810000" />
+      <workItem from="1678636216222" duration="16896000" />
     </task>
     <task id="LOCAL-00001" summary="First commit">
       <created>1678636834719</created>
@@ -134,7 +137,14 @@
       <option name="project" value="LOCAL" />
       <updated>1678650189328</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="aggiunto startSnapshot">
+      <created>1678652577369</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1678652577369</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -174,7 +184,8 @@
     <MESSAGE value="implementata la logica" />
     <MESSAGE value="aggiunta la logica" />
     <MESSAGE value="modificato il main" />
-    <option name="LAST_COMMIT_MESSAGE" value="modificato il main" />
+    <MESSAGE value="aggiunto startSnapshot" />
+    <option name="LAST_COMMIT_MESSAGE" value="aggiunto startSnapshot" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

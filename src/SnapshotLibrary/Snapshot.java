@@ -14,7 +14,7 @@ public class Snapshot implements Serializable {
     private  UUID snapshotId = null;
 
     private  Serializable status = null;
-    private List<Pair<SocketAddress,SnapMsg>> node_messages_List = new ArrayList<Pair<SocketAddress,SnapMsg>>();
+    private List<Pair<SocketAddress,Object>> node_messages_List = new ArrayList<Pair<SocketAddress,Object>>();
     private List<SocketAddress> connected_nodes = new ArrayList<SocketAddress>(); //contiene gli incoming nodes quando faccio partire lo snapshot
 
 
@@ -43,11 +43,11 @@ public class Snapshot implements Serializable {
         return snapshotId;
     }
 
-    public List<Pair<SocketAddress,SnapMsg>> getNode_messages_List() {
+    public List<Pair<SocketAddress,Object>> getNode_messages_List() {
         return node_messages_List;
     }
 
-    public void addNode_messages_List(SocketAddress nodeID, SnapMsg msg) {
+    public void addNode_messages_List(SocketAddress nodeID, Object msg) {
         this.node_messages_List.add(Pair.of(nodeID, msg));
     }
 

@@ -169,7 +169,7 @@ public class DistributedSnapshot{
 
                     } else if (snapshotRunning) { //no marker
                         if(snapshot.getConnected_nodes().contains(clientSocket.getRemoteSocketAddress())){
-                            snapshot.addNode_messages_List(clientSocket.getRemoteSocketAddress(),(SnapMsg) inputObject); }
+                            snapshot.addNode_messages_List(clientSocket.getRemoteSocketAddress(), inputObject); }
                     } else { //not snapshot running, no marker
                         System.out.println("non salvo i messaggi che ricevo");
                         //non salvo i messaggi che ricevo
