@@ -9,14 +9,16 @@ import java.net.InetAddress;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
+import static java.lang.Thread.sleep;
+
 public class SenderMessageTest {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         DistributedSnapshot ds = new DistributedSnapshot();
         ds.init();
 
-
+        sleep(7000);
         InetAddress ipAddress = InetAddress.getByName("192.168.1.11");
-        int port = 10514; //harcodare qui la porta del nodo server
+        int port = 10720; //harcodare qui la porta del nodo server
         String node1 = ds.installNewConnectionToNode(ipAddress,port );
         System.out.println("Connessione installata");
 

@@ -30,7 +30,7 @@ public class DistributedSnapshot{
 
     public void init() throws IOException {
         server = new Server();
-        server.start(0);
+        server.start(43911);
         System.out.println("Aperto il server");
     }
 
@@ -52,6 +52,17 @@ public class DistributedSnapshot{
         Socket destination = output_nodes.get(UUID.fromString(node_id));
 
         output_stream.get(UUID.fromString(node_id)).writeObject(msg);
+    }
+
+    public void startSnapshot() throws IOException {
+        Marker marker = new Marker(UUID.randomUUID());
+        snapshot = new Snapshot(marker.getSnapshotId(),0,input_nodes);
+        snapshotRunning = true;
+        //invio marker a tutti i nodi
+        for (Map.Entry<UUID, ObjectOutputStream> entry : output_stream.entrySet()) {
+            ObjectOutputStream objectOutput = entry.getValue();
+            objectOutput.writeObject(marker);
+        }
     }
 
 
