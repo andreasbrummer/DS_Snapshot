@@ -51,10 +51,13 @@ public class Snapshot implements Serializable {
         this.node_messages_List.add(Pair.of(nodeID, msg));
     }
 
+
     public void print_snapshot(){
         System.out.println("Snapshot ID: " + snapshotId);
         System.out.println("Status: " + status);
         System.out.println("Connected nodes: " + connected_nodes);
         System.out.println("Node messages: " + node_messages_List);
     }
+
+
 }

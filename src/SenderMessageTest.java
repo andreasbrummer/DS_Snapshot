@@ -1,5 +1,4 @@
-package SnapshotLibrary;
-
+import SnapshotLibrary.DistributedSnapshot;
 import SnapshotLibrary.Messages.Marker;
 
 import java.io.BufferedReader;
@@ -13,13 +12,29 @@ import static java.lang.Thread.sleep;
 
 public class SenderMessageTest {
     public static void main(String[] args) throws IOException, InterruptedException {
+        int port1=24071,port2=24079;
         DistributedSnapshot ds = new DistributedSnapshot();
-        ds.init();
+       int port = 24072; //porta d ascolto
+            if (args.length > 0) {
+                if(Integer.parseInt(args[0])==0){
+                    ds.init(port1);
+                    sleep(10000);
+                    port=port2;
+                }
+                else {
+                    sleep(1000);
+                    ds.init(port2);
+                    port = port1;
+                }
+            }
+            else{
+                System.out.println("Inserire 0 o 1 come argomento");
+            }
 
-        sleep(7000);
-        InetAddress ipAddress = InetAddress.getByName("192.168.1.11");
-        int port = 10720; //harcodare qui la porta del nodo server
-        String node1 = ds.installNewConnectionToNode(ipAddress,port );
+
+        InetAddress ipAddress = InetAddress.getByName("127.0.0.1");
+        //harcodare qui la porta del nodo server 10720
+        String node1 = ds.installNewConnectionToNode(ipAddress, port);
         System.out.println("Connessione installata");
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));

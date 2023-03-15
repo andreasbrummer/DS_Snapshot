@@ -1,0 +1,61 @@
+APPLICAZIONE
+
+Serializable Stato;
+
+ds.
+
+
+
+
+
+
+
+
+
+thread per la ricezione{
+prendo nuovo messaggio dalla coda
+applico la funzione AggiornaStato(nuovo msg ricevuto);
+
+}
+
+
+void funzione aggiorna stato(msg ricevuto){
+if(msg == "ciao"){
+Stato = "ciao";
+}
+else if(msg == "arrivederci"){
+    persone salutate++;
+}
+}
+
+
+
+DS                           APP
+timestamp 0                   timestamp 0
+state     0                   state 0
+5-4-3-2-1
+
+
+
+DS                           APP
+timestamp 0                   timestamp 2
+state     0                   state 3
+5-4-3-2-1                     2-1
+
+
+DS.upDateState(state, timestamp){
+   ....
+}
+
+DS                           APP
+timestamp 2                   timestamp
+state     3                   state 3
+5-4-3
+
+DS                           APP
+timestamp 2                   timestamp 5
+state     3                   state 15
+--->7-6-m-5-4-3   --->
+S state 3
+7-6-m-5-4-3
+

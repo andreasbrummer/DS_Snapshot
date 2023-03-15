@@ -13,6 +13,8 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.*;
 
+import static java.lang.Thread.sleep;
+
 public class DistributedSnapshot{
     private int serverPortNumber;
     private Serializable status;
@@ -22,6 +24,8 @@ public class DistributedSnapshot{
     private Snapshot snapshot;//poi diventera una lista
     private final Storage storage = new Storage();
 
+
+
     //per tenere la lista di tutti i nodi a cui sono connesso. output_nodes.getPort(), ...getInetAddress() per l IP
     Map<UUID,Socket> output_nodes = new HashMap<>();
     Map<UUID,ObjectOutputStream> output_stream = new HashMap<>();
@@ -30,7 +34,7 @@ public class DistributedSnapshot{
 
     public void init() throws IOException {
         server = new Server();
-        server.start(43911);
+        server.start(port);
         System.out.println("Aperto il server");
     }
 
@@ -147,6 +151,7 @@ public class DistributedSnapshot{
                         //creo lo snapshot e salvo lo stato
                         //mettere l'UUID del marker ricevuto
                         snapshot = new Snapshot(UUID.randomUUID(), status,input_nodes);
+                        sleep(10000);
                         //blocco salvataggio da quel canale
                         if(snapshot.remove_from_node_address_list(clientSocket.getRemoteSocketAddress())){
                             storage.storeSnapshot(snapshot);
@@ -185,6 +190,8 @@ public class DistributedSnapshot{
                 System.out.println("chiuso il socket");
                 throw new RuntimeException(e);
             } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
