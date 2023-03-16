@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
     * */
 
 public class DistributedSnapshot{
+    private MessageListener listener;
     private Serializable status;
     private Server server;
     private final Path path;
@@ -64,8 +65,9 @@ public class DistributedSnapshot{
     public DistributedSnapshot(Path path) {
         this.path = path;
     }
-    public DistributedSnapshot(String folderName) {
+    public DistributedSnapshot(String folderName, MessageListener listener) {
         this.path = Storage.createFolder(folderName);
+        this.listener = listener;
     }
     public DistributedSnapshot() {
         this.path = Storage.createFolder("Snapshots");
@@ -101,7 +103,9 @@ public class DistributedSnapshot{
 
     public void startSnapshot() throws IOException {
         Marker marker = new Marker(UUID.randomUUID());
-        snapshots.put(marker.getSnapshotId(), new Snapshot(marker.getSnapshotId(), status, input_nodes));
+        List<SocketAddress> input_nodesToBePassed = new ArrayList<>(input_nodes);
+        snapshots.put(marker.getSnapshotId(), new Snapshot(marker.getSnapshotId(), status, input_nodesToBePassed));
+        //LOGGER.info("Starting snapshot " + input_nodes); //only for test
 
         // send marker to all nodes
         for (ObjectOutputStream objectOutput : output_stream.values()) {
@@ -252,6 +256,7 @@ public class DistributedSnapshot{
                 // Snapshot in progress: save received messages
                 for (Snapshot snapshot : snapshots.values()) {
                     LOGGER.debug("Saving received messages: "+ message);
+                    //LOGGER.debug(snapshot.getConnectedNodes()); //only to test
                     if (snapshot.getConnectedNodes().contains(clientSocket.getRemoteSocketAddress())) {
                         snapshot.addNodeMessage(clientSocket.getRemoteSocketAddress(), message);
                     }
@@ -266,6 +271,7 @@ public class DistributedSnapshot{
                 //ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
                 Object inputObject;
                 while ((inputObject = in.readObject()) != null) {
+                    listener.onMessageReceived(inputObject);
                     /*Controllo se ho ricevuto un marker*/
                     if (inputObject instanceof Marker ) {
                         LOGGER.debug("Received a new marker:\n Id: " + ((Marker) inputObject).getSnapshotId());
@@ -299,7 +305,6 @@ public class DistributedSnapshot{
             }
             }
         }
-
     }
 
 

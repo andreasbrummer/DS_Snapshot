@@ -1,4 +1,5 @@
 import SnapshotLibrary.DistributedSnapshot;
+import SnapshotLibrary.MessageListener;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,11 +12,20 @@ import static java.lang.Thread.sleep;
 public class SenderMessageTest {
     public static void main(String[] args) throws IOException, InterruptedException {
         int port1=24071,port2=24079;
-        DistributedSnapshot ds = new DistributedSnapshot();
+        DistributedSnapshot ds = null;
         //listener port
        int port = 24072;
+
+        MessageListener listener = new MessageListener() {
+            @Override
+            public void onMessageReceived(Object message) {
+                System.out.println("Messaggio ricevuto nel main: " + message);
+            }
+        };
+
             if (args.length > 0) {
                 if(Integer.parseInt(args[0])==0){
+                    ds = new DistributedSnapshot("Snapshot1",listener);
                     while(!ds.init(port1)){
                         sleep(5000);
                         Logger.getLogger("SenderMessageTest").info("Porta "+port1 + " occupata, aspetto 5 secondi");
@@ -24,6 +34,7 @@ public class SenderMessageTest {
                     sleep(5000);
                 }
                 else {
+                    ds = new DistributedSnapshot("Snapshot2",listener);
                     while (!ds.init(port2)) {
                         sleep(1000);
                         Logger.getLogger("SenderMessageTest").info("Porta " + port2 + "occupata, aspetto 5 secondi");
@@ -34,6 +45,7 @@ public class SenderMessageTest {
             else{
                 System.out.println("Insert 0 o 1 as argument\n");
             }
+
 
 
         InetAddress ipAddress = InetAddress.getByName("127.0.0.1");
