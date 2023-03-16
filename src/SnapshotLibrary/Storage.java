@@ -12,19 +12,12 @@ import java.util.UUID;
 /* this class is used to store the snapshots in a folder */
 public class Storage {
 
-    // the folder where the snapshots are stored
-    private String folderName = "snapshots";
-
-    // used to set the folder name
-    public Storage() {
-        createFolder(folderName);
-    }
-    public static void createFolder(String folderName) {
+    public static Path createFolder(String folderName) {
+        Path path = Paths.get(folderName);
         try {
-            Path path = Paths.get(folderName);
             if (!Files.exists(path)) {
                 try {
-                    System.out.println("Creating folder");
+                    System.out.println("Creating folder...");
                     Files.createDirectory(path);
                 } catch (FileAlreadyExistsException ignored) {}
             }
@@ -32,33 +25,23 @@ public class Storage {
             System.err.println("Could not create folder");
             e.printStackTrace();
         }
+        return path;
     }
     //method to store the snapshot
-    public void  storeSnapshot(Snapshot snapshot) {
-        try {
-            Path path = Paths.get(folderName);
-            if (!Files.exists(path)) {
-                try {
-                    Files.createFile(path);
-                } catch (FileAlreadyExistsException ignored) {}
-            }
-            try (FileOutputStream out = new FileOutputStream(folderName + File.separator + "snapshot_" + snapshot.getSnapshotId().toString())) {
-                out.write(SerializationUtils.serialize(snapshot));
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-
-            }
+    public static void  storeSnapshot(Snapshot snapshot,Path path) {
+        try (FileOutputStream out = new FileOutputStream(path + File.separator + "snapshot_" + snapshot.getSnapshotId().toString())) {
+            out.write(SerializationUtils.serialize(snapshot));
 
         } catch (IOException e) {
-            System.err.println("Could not create file");
-            e.printStackTrace();
+            throw new RuntimeException(e);
+
         }
+
     }
 
     //method to retrieve the snapshot
-    public Snapshot retrieveSnapshot(UUID snapshotId) throws IOException, ClassNotFoundException {
-        FileInputStream fileIn = new FileInputStream(folderName + File.separator +"snapshot_" + snapshotId.toString());
+    public static Snapshot retrieveSnapshot(UUID snapshotId, Path path) throws IOException, ClassNotFoundException {
+        FileInputStream fileIn = new FileInputStream(path + File.separator +"snapshot_" + snapshotId.toString());
         ObjectInputStream in = new ObjectInputStream(fileIn);
         Snapshot snapshot = (Snapshot) in.readObject();
         return snapshot;

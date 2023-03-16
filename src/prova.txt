@@ -59,3 +59,39 @@ state     3                   state 15
 S state 3
 7-6-m-5-4-3
 
+//import java.util.ArrayList;
+//        import java.util.HashMap;
+//        import java.util.List;
+//        import java.util.Map;
+//
+//public class MessageReceiver {
+//    private Map<String, List<String>> messagesByNode = new HashMap<>();
+//
+//    public void receiveMessage(String message, String nodeAddress) {
+//        if (!messagesByNode.containsKey(nodeAddress)) {
+//            messagesByNode.put(nodeAddress, new ArrayList<>());
+//        }
+//        messagesByNode.get(nodeAddress).add(message);
+//    }
+//}
+//
+//
+//import java.io.IOException;
+//        import java.io.OutputStream;
+//        import java.net.Socket;
+//
+//public class MessageSender {
+//    public void sendMessage(String message, String nodeAddress, int portNumber) {
+//        try {
+//            Socket socket = new Socket(nodeAddress, portNumber);
+//            OutputStream out = socket.getOutputStream();
+//
+//            out.write(message.getBytes());
+//            out.flush();
+//
+//            socket.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+//}

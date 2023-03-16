@@ -28,18 +28,16 @@ public class SenderMessageTest {
                 }
             }
             else{
-                System.out.println("Inserire 0 o 1 come argomento");
+                System.out.println("Inserire 0 o 1 come argomento\n");
             }
 
 
         InetAddress ipAddress = InetAddress.getByName("127.0.0.1");
         //harcodare qui la porta del nodo server 10720
         String node1 = ds.installNewConnectionToNode(ipAddress, port);
-        System.out.println("Connessione installata");
-
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         while (true) {
-                System.out.print("Inserisci l'oggetto da inviare: ");
+                System.out.print("Inserisci l'oggetto da inviare: \n");
                 // Qui si assume che l'oggetto sia di tipo String, ma è possibile utilizzare qualsiasi altro tipo di oggetto
                 Object object = reader.readLine();
                 if(object.equals("marker")){
