@@ -4,30 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="Improved testing, added multisnapshot and improved the code">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__commons_logging_commons_logging_1_1_3.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__jakarta_annotation_jakarta_annotation_api_1_3_5.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__jakarta_ws_rs_jakarta_ws_rs_api_2_1_6.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__log4j_log4j_1_2_17.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_hk2_external_jakarta_inject_2_6_1.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_hk2_osgi_resource_locator_1_0_3.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_jersey_core_jersey_common_2_34.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_slf4j_slf4j_api_1_7_33.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_slf4j_slf4j_log4j12_1_8_0_beta4.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_slf4j_slf4j_simple_2_0_0_alpha1.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/log4j.properties" afterDir="false" />
+    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="Only one WD">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DS_Snapshot.iml" beforeDir="false" afterPath="$PROJECT_DIR$/DS_Snapshot.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SenderMessageTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SenderMessageTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Snapshot.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Snapshot.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/main.class" afterDir="false" />
     </list>
     <list id="db76312a-c781-498c-9c6b-f9e009619aa3" name="Changes by caser" comment="">
       <change beforePath="$PROJECT_DIR$/src/SenderMessageTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SenderMessageTest.java" afterDir="false" />
@@ -69,54 +48,11 @@
     </option>
   </component>
   <component name="LineStatusTrackerManager">
-    <file path="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java">
-      <ranges>
-        <range start1="3" end1="4" start2="3" end2="3" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="18" end1="18" start2="17" end2="20" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="19" end1="20" start2="21" end2="22" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="22" end1="23" start2="24" end2="25" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="36" end1="37" start2="38" end2="39" changelist="db76312a-c781-498c-9c6b-f9e009619aa3" />
-        <range start1="44" end1="45" start2="46" end2="46" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="47" end1="52" start2="48" end2="54" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="59" end1="61" start2="61" end2="63" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="70" end1="70" start2="72" end2="73" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="71" end1="75" start2="74" end2="80" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="77" end1="78" start2="82" end2="84" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="79" end1="80" start2="85" end2="86" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="92" end1="93" start2="98" end2="98" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="106" end1="108" start2="111" end2="113" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="111" end1="112" start2="116" end2="121" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="132" end1="134" start2="141" end2="142" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="141" end1="142" start2="149" end2="150" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="155" end1="156" start2="163" end2="164" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="160" end1="162" start2="168" end2="177" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="164" end1="164" start2="179" end2="180" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="171" end1="172" start2="187" end2="188" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="187" end1="190" start2="203" end2="203" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="192" end1="193" start2="205" end2="206" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="221" end1="225" start2="234" end2="238" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="236" end1="237" start2="249" end2="250" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="240" end1="243" start2="253" end2="256" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="257" end1="258" start2="270" end2="271" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="260" end1="261" start2="273" end2="274" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="265" end1="270" start2="278" end2="290" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="271" end1="271" start2="291" end2="299" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="275" end1="278" start2="303" end2="303" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-      </ranges>
-    </file>
     <file path="$PROJECT_DIR$/src/SenderMessageTest.java">
       <ranges>
-        <range start1="1" end1="2" start2="1" end2="1" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="7" end1="9" start2="6" end2="7" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="14" end1="15" start2="12" end2="13" changelist="db76312a-c781-498c-9c6b-f9e009619aa3" />
-        <range start1="16" end1="17" start2="14" end2="16" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="19" end1="22" start2="18" end2="24" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="24" end1="26" start2="26" end2="30" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="30" end1="31" start2="34" end2="35" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="38" end1="39" start2="42" end2="44" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="41" end1="42" start2="46" end2="46" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="48" end1="48" start2="52" end2="53" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="49" end1="49" start2="54" end2="56" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="12" end1="14" start2="12" end2="14" changelist="db76312a-c781-498c-9c6b-f9e009619aa3" />
+        <range start1="18" end1="18" start2="18" end2="19" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
+        <range start1="26" end1="26" start2="27" end2="28" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
       </ranges>
     </file>
   </component>
@@ -174,7 +110,7 @@
       <option name="MAIN_CLASS_NAME" value="SenderMessageTest" />
       <module name="DS_Snapshot" />
       <option name="PROGRAM_PARAMETERS" value="0" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../Prova/1" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../Prova" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -183,7 +119,7 @@
       <option name="MAIN_CLASS_NAME" value="SenderMessageTest" />
       <module name="DS_Snapshot" />
       <option name="PROGRAM_PARAMETERS" value="1" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../Prova/2" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../Prova" />
       <method v="2" />
     </configuration>
     <configuration name="Prova2" type="Application" factoryName="Application" folderName="New Folder">
@@ -269,7 +205,14 @@
       <option name="project" value="LOCAL" />
       <updated>1678993163641</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="other improvements">
+      <created>1679001515150</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1679001515150</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -312,7 +255,9 @@
     <MESSAGE value="aggiunto startSnapshot" />
     <MESSAGE value="Uno snapshot funziona" />
     <MESSAGE value="Improved testing, added multisnapshot and improved the code" />
-    <option name="LAST_COMMIT_MESSAGE" value="Improved testing, added multisnapshot and improved the code" />
+    <MESSAGE value="other improvements" />
+    <MESSAGE value="Only one WD" />
+    <option name="LAST_COMMIT_MESSAGE" value="Only one WD" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

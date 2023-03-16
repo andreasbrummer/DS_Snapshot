@@ -16,6 +16,7 @@ public class SenderMessageTest {
        int port = 24072;
             if (args.length > 0) {
                 if(Integer.parseInt(args[0])==0){
+                   ds = new DistributedSnapshot("Snapshot1");
                     while(!ds.init(port1)){
                         sleep(5000);
                         Logger.getLogger("SenderMessageTest").info("Porta "+port1 + " occupata, aspetto 5 secondi");
@@ -24,6 +25,7 @@ public class SenderMessageTest {
                     sleep(5000);
                 }
                 else {
+                    ds = new DistributedSnapshot("Snapshot2");
                     while (!ds.init(port2)) {
                         sleep(1000);
                         Logger.getLogger("SenderMessageTest").info("Porta " + port2 + "occupata, aspetto 5 secondi");
