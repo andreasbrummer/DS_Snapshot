@@ -20,7 +20,7 @@ public class DistributedSnapshot{
     Map<UUID,Socket> output_nodes = new HashMap<>();
     Map<UUID,ObjectOutputStream> output_stream = new HashMap<>();
 
-    public void init() throws IOException {
+    public void init(int port) throws IOException {
         server = new Server();
         server.start(0);
         System.out.println("Aperto il server");

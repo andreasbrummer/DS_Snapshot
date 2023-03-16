@@ -7,7 +7,7 @@ import java.net.Socket;
 public class main {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         DistributedSnapshot ds = new DistributedSnapshot();
-        ds.init();
+        ds.init(0);
 
         //System.out.println("ora invio un messaggio: ");
         //sendMessage("Hello Snapshot", "127.0.0.1", 6942);
