@@ -95,3 +95,12 @@ S state 3
 //        }
 //    }
 //}
+
+//CASO CLIENT SI SPEGNE IMPROVVISAMENTE
+Se il client si chiude improvvisamente senza chiudere correttamente la connessione, il metodo isClosed() restituirà ancora false, anche se il socket del client non è più in grado di ricevere o inviare dati.
+
+Ciò accade perché il socket del client rimane aperto fino a quando non viene chiuso correttamente, ad esempio tramite la chiamata del metodo close() sul socket.
+
+Per verificare se la connessione è stata interrotta a causa di un errore o di una disconnessione non corretta, è necessario utilizzare un altro metodo come isConnected() o isInputShutdown(), che possono essere utilizzati per verificare lo stato del socket e capire se ci sono errori di connessione.
+
+Ad esempio, il metodo isConnected() restituirà false se il socket del client è stato chiuso o non è stato mai aperto, mentre il metodo isInputShutdown() restituirà true se il socket del client è stato chiuso in modo corretto o se è stato interrotto a causa di un errore o di una disconnessione non corretta.

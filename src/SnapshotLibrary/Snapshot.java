@@ -9,11 +9,11 @@ import java.util.*;
 public class Snapshot implements Serializable {
 
     private UUID snapshotId;
-    private Serializable snapshotStatus;
+    private State snapshotStatus;
     private List<Pair<SocketAddress, Object>> nodeMessages = new ArrayList<>();
     private List<SocketAddress> connectedNodes = new ArrayList<>();
 
-    public Snapshot(UUID snapshotId, Serializable snapshotStatus, List<SocketAddress> connectedNodes) {
+    public Snapshot(UUID snapshotId, State snapshotStatus, List<SocketAddress> connectedNodes) {
         this.snapshotId = snapshotId;
         this.snapshotStatus = snapshotStatus;
         this.connectedNodes = connectedNodes;

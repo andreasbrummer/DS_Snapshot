@@ -1,31 +1,29 @@
 import SnapshotLibrary.DistributedSnapshot;
 import SnapshotLibrary.MessageListener;
+import SnapshotLibrary.State;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.logging.Logger;
 
 import static java.lang.Thread.sleep;
 
-public class SenderMessageTest {
+public class SenderMessageTest{
     public static void main(String[] args) throws IOException, InterruptedException {
         int port1=24071,port2=24079;
         DistributedSnapshot ds = null;
         //listener port
        int port = 24072;
+        MyState state = new MyState();
 
-        MessageListener listener = new MessageListener() {
-            @Override
-            public void onMessageReceived(Object message) {
-                System.out.println("Messaggio ricevuto nel main: " + message);
-            }
-        };
+        MessageListener listener = new MyListener(state);
 
             if (args.length > 0) {
                 if(Integer.parseInt(args[0])==0){
-                    ds = new DistributedSnapshot("Snapshot1",listener);
+                    ds = new DistributedSnapshot("Snapshot1", listener, state);
                     while(!ds.init(port1)){
                         sleep(5000);
                         Logger.getLogger("SenderMessageTest").info("Porta "+port1 + " occupata, aspetto 5 secondi");
@@ -34,7 +32,7 @@ public class SenderMessageTest {
                     sleep(5000);
                 }
                 else {
-                    ds = new DistributedSnapshot("Snapshot2",listener);
+                    ds = new DistributedSnapshot("Snapshot2",listener,state);
                     while (!ds.init(port2)) {
                         sleep(1000);
                         Logger.getLogger("SenderMessageTest").info("Porta " + port2 + "occupata, aspetto 5 secondi");

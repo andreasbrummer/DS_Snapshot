@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
     * @param: status: current status of the distributed system
     * @param: server: server object
     * @param: path: path to the directory where snapshots will be stored
-    * @param: input_nodes: list of input nodes
+    * @param: input_nodes: list of SocketAddress of input nodes
     * @param: snapshots: map of all snapshots currently in progress
     * @param: output_nodes: map of all output nodes, using UUID as key and Socket object as value
     * @param: output_stream: map of all output streams, using UUID as key and ObjectOutputStream object as value
@@ -45,13 +45,13 @@ import org.apache.commons.logging.LogFactory;
 
 public class DistributedSnapshot{
     private MessageListener listener;
-    private Serializable status;
+    private State status;
     private Server server;
     private final Path path;
-    private final List<SocketAddress> input_nodes = new ArrayList<>();
+    private final List<SocketAddress> inputNodes = new ArrayList<>();
     private final Map<UUID,Snapshot> snapshots = new HashMap<>();
-    private final Map<UUID,Socket> output_nodes = new HashMap<>();
-    private final Map<UUID,ObjectOutputStream> output_stream = new HashMap<>();
+    private final Map<UUID,Socket> outputNodes = new HashMap<>();
+    private final Map<UUID,ObjectOutputStream> outputStream = new HashMap<>();
     private static final Log LOGGER = LogFactory.getLog(DistributedSnapshot.class);
 
 
@@ -65,9 +65,10 @@ public class DistributedSnapshot{
     public DistributedSnapshot(Path path) {
         this.path = path;
     }
-    public DistributedSnapshot(String folderName, MessageListener listener) {
+    public DistributedSnapshot(String folderName, MessageListener listener, State status) {
         this.path = Storage.createFolder(folderName);
         this.listener = listener;
+        this.status = status;
     }
     public DistributedSnapshot() {
         this.path = Storage.createFolder("Snapshots");
@@ -91,24 +92,23 @@ public class DistributedSnapshot{
     public String installNewConnectionToNode(InetAddress ip, int port) throws IOException {
         Socket socket = new Socket(ip, port);
         UUID id = UUID.randomUUID();
-        output_nodes.put(id, socket);
+        outputNodes.put(id, socket);
         ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
-        output_stream.put(id, objectOutput);
+        outputStream.put(id, objectOutput);
         return id.toString();
     }
 
     public void sendMessage(String node_id, Object msg) throws IOException {
-        output_stream.get(UUID.fromString(node_id)).writeObject(msg);
+        outputStream.get(UUID.fromString(node_id)).writeObject(msg);
     }
 
     public void startSnapshot() throws IOException {
         Marker marker = new Marker(UUID.randomUUID());
-        List<SocketAddress> input_nodesToBePassed = new ArrayList<>(input_nodes);
-        snapshots.put(marker.getSnapshotId(), new Snapshot(marker.getSnapshotId(), status, input_nodesToBePassed));
+        snapshots.put(marker.getSnapshotId(), new Snapshot(marker.getSnapshotId(), status,new ArrayList<>(inputNodes)));
         //LOGGER.info("Starting snapshot " + input_nodes); //only for test
 
         // send marker to all nodes
-        for (ObjectOutputStream objectOutput : output_stream.values()) {
+        for (ObjectOutputStream objectOutput : outputStream.values()) {
             objectOutput.writeObject(marker);
         }
     }
@@ -149,7 +149,7 @@ public class DistributedSnapshot{
                     while (running) {
                         try {
                             Socket socket = serverSocket.accept();
-                            input_nodes.add(socket.getRemoteSocketAddress());
+                            inputNodes.add(socket.getRemoteSocketAddress());
                             // Gestisci la connessione del client qui:
                             LOGGER.info("New connection established with:" + socket.getInetAddress() + " port:" + socket.getPort());
                             new Thread(new NodeHandler(socket)).start();
@@ -208,7 +208,7 @@ public class DistributedSnapshot{
             } else {
                 // Case: starting snapshot
                 LOGGER.info("Starting snapshot " + snapshotId);
-                snapshot = new Snapshot(snapshotId, status, input_nodes);
+                snapshot = new Snapshot(snapshotId, status, new ArrayList<>(inputNodes));
 
                 snapshots.put(snapshotId, snapshot);
 
@@ -218,9 +218,9 @@ public class DistributedSnapshot{
                     ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
                     executor.schedule(() -> {
                         // Forward marker to all other nodes in the network
-                        output_nodes.forEach((k, v) -> {
+                        outputNodes.forEach((k, v) -> {
                             try {
-                                output_stream.get(k).writeObject(marker);
+                                outputStream.get(k).writeObject(marker);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -228,9 +228,9 @@ public class DistributedSnapshot{
                     }, SNAPSHOT_START_DELAY_MS, TimeUnit.MILLISECONDS);
                 }
                 else {
-                    output_nodes.forEach((k, v) -> {
+                    outputNodes.forEach((k, v) -> {
                         try {
-                            output_stream.get(k).writeObject(marker);
+                            outputStream.get(k).writeObject(marker);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -259,6 +259,7 @@ public class DistributedSnapshot{
                     //LOGGER.debug(snapshot.getConnectedNodes()); //only to test
                     if (snapshot.getConnectedNodes().contains(clientSocket.getRemoteSocketAddress())) {
                         snapshot.addNodeMessage(clientSocket.getRemoteSocketAddress(), message);
+                        LOGGER.debug(snapshot.getConnectedNodes().toString() + clientSocket.toString()+ message);
                     }
                 }
             }
@@ -279,6 +280,7 @@ public class DistributedSnapshot{
                     } else {
                         LOGGER.debug("Received a new message: " + inputObject);
                         handleMessage(inputObject);
+                        listener.onMessageReceived(inputObject);
                     }
                 }
             } catch (IOException e) {
