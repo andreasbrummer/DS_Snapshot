@@ -15,6 +15,8 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -57,10 +59,10 @@ public class DistributedSnapshot{
 
     /*  only for testing
         delay (in milliseconds) before a snapshot is started */
-    private static final int SNAPSHOT_START_DELAY_MS = 10000;
+    static final int SNAPSHOT_START_DELAY_MS = 10000;
 
     /*  only for testing */
-    private static final boolean TEST_MODE = true;
+    static final boolean TEST_MODE = true;
     //TODO capire il discorso delle cartella e dei file (es. se cartella è gia esistente)
     public DistributedSnapshot(Path path) {
         this.path = path;
@@ -102,8 +104,9 @@ public class DistributedSnapshot{
         outputStream.get(UUID.fromString(node_id)).writeObject(msg);
     }
 
-    public void startSnapshot() throws IOException {
-        Marker marker = new Marker(UUID.randomUUID());
+    public UUID startSnapshot() throws IOException {
+        UUID snapshotId = UUID.randomUUID();
+        Marker marker = new Marker(snapshotId);
         snapshots.put(marker.getSnapshotId(), new Snapshot(marker.getSnapshotId(), status,new ArrayList<>(inputNodes)));
         //LOGGER.info("Starting snapshot " + input_nodes); //only for test
 
@@ -111,6 +114,7 @@ public class DistributedSnapshot{
         for (ObjectOutputStream objectOutput : outputStream.values()) {
             objectOutput.writeObject(marker);
         }
+        return snapshotId;
     }
 
     public void endSnapshot(Snapshot snapshot)  {
@@ -124,6 +128,20 @@ public class DistributedSnapshot{
         }
 
 
+    }
+
+    public void restoreSnapshot(UUID snapshotId) throws IOException, ClassNotFoundException {
+        Snapshot snapshot = Storage.loadSnapshot(snapshotId, path);
+        if(snapshot != null) {
+            LOGGER.info("Restoring snapshot " + snapshotId);
+            status = (State) snapshot.getStatus();
+            List<Pair<SocketAddress,Object>> nodeMessages = snapshot.getNodeMessages();
+            while(!snapshot.getNodeMessages().isEmpty()) {
+                Pair<SocketAddress, Object> pair = nodeMessages.remove(0);
+                listener.onMessageReceived(pair.getRight());
+            }
+
+        }
     }
 
 
@@ -190,10 +208,11 @@ public class DistributedSnapshot{
 
     private class NodeHandler implements Runnable {
         private final Socket clientSocket;
-
         public NodeHandler(Socket socket) {
             this.clientSocket = socket;
         }
+
+
         /* @description: handleMarker method
          * @note: This method is used to handle a marker message.
          */
@@ -272,14 +291,13 @@ public class DistributedSnapshot{
                 //ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
                 Object inputObject;
                 while ((inputObject = in.readObject()) != null) {
-                    listener.onMessageReceived(inputObject);
+                    //listener.onMessageReceived(inputObject);
                     /*Controllo se ho ricevuto un marker*/
                     if (inputObject instanceof Marker ) {
                         LOGGER.debug("Received a new marker:\n Id: " + ((Marker) inputObject).getSnapshotId());
                         handleMarker((Marker) inputObject);
                     } else {
                         LOGGER.debug("Received a new message: " + inputObject);
-                        handleMessage(inputObject);
                         listener.onMessageReceived(inputObject);
                     }
                 }
@@ -302,7 +320,7 @@ public class DistributedSnapshot{
                 try {
                     clientSocket.close(); //IN TEORIA NON DOBBIAMO CHIUDERE NOI IL SOCKET DEL CLIENT. DEVE CHIUDERLO IL CLIENT
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
             }
             }

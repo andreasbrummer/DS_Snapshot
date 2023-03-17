@@ -1,4 +1,4 @@
-package SnapshotLibrary;
+ package  SnapshotLibrary;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -28,7 +28,7 @@ public class Snapshot implements Serializable {
         return connectedNodes;
     }
 
-    public Serializable getSnapshotStatus() {
+    public State getStatus() {
         return snapshotStatus;
     }
 

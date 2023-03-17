@@ -7,18 +7,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import static java.lang.Thread.sleep;
 
 public class SenderMessageTest{
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
         int port1=24071,port2=24079;
         DistributedSnapshot ds = null;
         //listener port
        int port = 24072;
         MyState state = new MyState();
-
         MessageListener listener = new MyListener(state);
 
             if (args.length > 0) {
@@ -51,13 +51,16 @@ public class SenderMessageTest{
         String node1 = ds.installNewConnectionToNode(ipAddress, port);
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         Object object = reader.readLine();
+        UUID id = null;
         while (!object.equals("fine")) {
                 System.out.print("Inserisci l'oggetto da inviare: \n");
                 // Qui si assume che l'oggetto sia di tipo String, ma è possibile utilizzare qualsiasi altro tipo di oggetto
                 if(object.equals("marker")){
                     ds.startSnapshot();
-                }
-                else{
+                } else if (object.equals("restore")) {
+                    ds.restoreSnapshot(id);
+                    object = id;
+                } else{
                     ds.sendMessage(node1,object);
                 }
                 object = reader.readLine();

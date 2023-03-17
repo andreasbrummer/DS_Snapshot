@@ -40,12 +40,13 @@ public class Storage {
     }
 
     //method to retrieve the snapshot
-    public static Snapshot retrieveSnapshot(UUID snapshotId, Path path) throws IOException, ClassNotFoundException {
+    public static Snapshot loadSnapshot(UUID snapshotId, Path path) throws IOException, ClassNotFoundException {
         FileInputStream fileIn = new FileInputStream(path + File.separator +"snapshot_" + snapshotId.toString());
         ObjectInputStream in = new ObjectInputStream(fileIn);
         Snapshot snapshot = (Snapshot) in.readObject();
         return snapshot;
     }
+
 
     //method to delete the snapshot
 
