@@ -5,14 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="MyListener&#10;MyState &#10;added">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_commons_commons_collections4_4_4.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DS_Snapshot.iml" beforeDir="false" afterPath="$PROJECT_DIR$/DS_Snapshot.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MyListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/MyListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MyState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/MyState.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SenderMessageTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SenderMessageTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/MessageListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/MessageListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/State.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/State.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/Storage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Storage.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Snapshot.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Snapshot.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Storage.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Storage.class" afterDir="false" />
     </list>
     <list id="db76312a-c781-498c-9c6b-f9e009619aa3" name="Changes by caser" comment="" />
@@ -77,7 +80,7 @@
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;TODO_SCOPE&quot;: &quot;All Places&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/andreas/Desktop/DS/Prova&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/caser/Prova&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -109,7 +112,7 @@
       <option name="MAIN_CLASS_NAME" value="SenderMessageTest" />
       <module name="DS_Snapshot" />
       <option name="PROGRAM_PARAMETERS" value="0" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../Prova" />
+      <option name="WORKING_DIRECTORY" value="$USER_HOME$/Prova" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -118,7 +121,7 @@
       <option name="MAIN_CLASS_NAME" value="SenderMessageTest" />
       <module name="DS_Snapshot" />
       <option name="PROGRAM_PARAMETERS" value="1" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../Prova" />
+      <option name="WORKING_DIRECTORY" value="$USER_HOME$/Prova" />
       <method v="2" />
     </configuration>
     <configuration name="Prova2" type="Application" factoryName="Application" folderName="New Folder">
@@ -147,6 +150,8 @@
       <workItem from="1678654071753" duration="1690000" />
       <workItem from="1678866415385" duration="466000" />
       <workItem from="1678901562944" duration="8759000" />
+      <workItem from="1679666526397" duration="1155000" />
+      <workItem from="1679668780782" duration="11145000" />
     </task>
     <task id="LOCAL-00001" summary="First commit">
       <created>1678636834719</created>

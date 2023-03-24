@@ -7,6 +7,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.UUID;
 
 /* this class is used to store the snapshots in a folder */
@@ -46,6 +47,29 @@ public class Storage {
         Snapshot snapshot = (Snapshot) in.readObject();
         return snapshot;
     }
+
+    //method to retrieve last saved snapshot name
+    public static String retrieveLastSnapshot(String folderPath) {
+        // crea un oggetto File che rappresenta la cartella
+        File folder = new File(folderPath);
+
+        // ottiene la lista dei file nella cartella
+        File[] files = folder.listFiles();
+
+        // se la cartella è vuota, restituisci null
+        if (files == null || files.length == 0) {
+            return null;
+        }
+
+        // ordina la lista di file in ordine cronologico (dal più vecchio al più recente)
+        Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
+
+        // ottiene il nome del primo file in ordine cronologico
+        String firstFileName = files[files.length-1].getName();
+
+        return firstFileName;
+    }
+
 
 
     //method to delete the snapshot

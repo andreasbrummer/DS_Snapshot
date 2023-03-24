@@ -56,10 +56,12 @@ public class DistributedSnapshot{
     private final Map<UUID,ObjectOutputStream> outputStream = new HashMap<>();
     private static final Log LOGGER = LogFactory.getLog(DistributedSnapshot.class);
 
+    private final Object messageLock = new Object();
+
 
     /*  only for testing
         delay (in milliseconds) before a snapshot is started */
-    static final int SNAPSHOT_START_DELAY_MS = 10000;
+    static final int SNAPSHOT_START_DELAY_MS = 5000;
 
     /*  only for testing */
     static final boolean TEST_MODE = true;
@@ -107,7 +109,8 @@ public class DistributedSnapshot{
     public UUID startSnapshot() throws IOException {
         UUID snapshotId = UUID.randomUUID();
         Marker marker = new Marker(snapshotId);
-        snapshots.put(marker.getSnapshotId(), new Snapshot(marker.getSnapshotId(), status,new ArrayList<>(inputNodes)));
+        State stateToStore = status.copy(); // Copia lo stato di status in stateToStore (altrimenti finche non faccio lo store, se ricevo i messaggi viene modificato)
+        snapshots.put(marker.getSnapshotId(), new Snapshot(marker.getSnapshotId(), stateToStore ,new ArrayList<>(inputNodes)));
         //LOGGER.info("Starting snapshot " + input_nodes); //only for test
 
         // send marker to all nodes
@@ -130,17 +133,19 @@ public class DistributedSnapshot{
 
     }
 
-    public void restoreSnapshot(UUID snapshotId) throws IOException, ClassNotFoundException {
+    public void restoreSnapshot(UUID snapshotId) throws IOException, ClassNotFoundException, InterruptedException {
         Snapshot snapshot = Storage.loadSnapshot(snapshotId, path);
         if(snapshot != null) {
-            LOGGER.info("Restoring snapshot " + snapshotId);
-            status = (State) snapshot.getStatus();
+            LOGGER.info("Restoring snapshot " + snapshotId + " ...");
+            State new_state = snapshot.getStatus();
+            status.setState(new_state);
+            LOGGER.info("Restoring: State of the saved snapshot: " + status.getState());
             List<Pair<SocketAddress,Object>> nodeMessages = snapshot.getNodeMessages();
             while(!snapshot.getNodeMessages().isEmpty()) {
                 Pair<SocketAddress, Object> pair = nodeMessages.remove(0);
                 listener.onMessageReceived(pair.getRight());
             }
-
+            LOGGER.info("Restoring: State after the incoming messages in the snapshot: " + status.getState());
         }
     }
 
@@ -227,7 +232,8 @@ public class DistributedSnapshot{
             } else {
                 // Case: starting snapshot
                 LOGGER.info("Starting snapshot " + snapshotId);
-                snapshot = new Snapshot(snapshotId, status, new ArrayList<>(inputNodes));
+                State stateToStore = status.copy(); // Copia lo stato di status in stateToStore (altrimenti finche non faccio lo store, se ricevo i messaggi viene modificato)
+                snapshot = new Snapshot(snapshotId, stateToStore, new ArrayList<>(inputNodes));
 
                 snapshots.put(snapshotId, snapshot);
 
@@ -291,14 +297,21 @@ public class DistributedSnapshot{
                 //ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
                 Object inputObject;
                 while ((inputObject = in.readObject()) != null) {
-                    //listener.onMessageReceived(inputObject);
-                    /*Controllo se ho ricevuto un marker*/
-                    if (inputObject instanceof Marker ) {
-                        LOGGER.debug("Received a new marker:\n Id: " + ((Marker) inputObject).getSnapshotId());
-                        handleMarker((Marker) inputObject);
-                    } else {
-                        LOGGER.debug("Received a new message: " + inputObject);
-                        listener.onMessageReceived(inputObject);
+                    synchronized(messageLock) {
+                        //listener.onMessageReceived(inputObject);
+                        /*Controllo se ho ricevuto un marker*/
+                        if (inputObject instanceof Marker) {
+                            LOGGER.debug("Received a new marker:\n Id: " + ((Marker) inputObject).getSnapshotId());
+                            handleMarker((Marker) inputObject);
+                        } else {
+                            LOGGER.debug("Received a new message: " + inputObject);
+                            handleMessage(inputObject); //Perche lo avevi tolto?
+
+                            //testato che aspetta che la chiamata termini prima di andare avanti
+                            //in realta aspetta anche se non è synchronize
+                            listener.onMessageReceived(inputObject);
+                            //LOGGER.debug("Eccomi sono fuori"); //for test
+                        }
                     }
                 }
             } catch (IOException e) {

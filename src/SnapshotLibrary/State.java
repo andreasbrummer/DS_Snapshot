@@ -4,7 +4,9 @@ import java.io.Serializable;
 public interface State extends Serializable {
 
 
-    void setState(Serializable newState);
+    void setState(State newState);
+
+    State copy();
 
     Serializable getState();
 }
