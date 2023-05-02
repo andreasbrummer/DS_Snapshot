@@ -46,6 +46,7 @@ import org.apache.commons.logging.LogFactory;
     * */
 
 public class DistributedSnapshot{
+    private static final UUID UUID_NULL = new UUID(0L, 0L);
     private MessageListener listener;
     private State status;
     private Server server;
@@ -57,6 +58,7 @@ public class DistributedSnapshot{
     private static final Log LOGGER = LogFactory.getLog(DistributedSnapshot.class);
 
     private final Object messageLock = new Object();
+
 
 
     /*  only for testing
@@ -133,9 +135,19 @@ public class DistributedSnapshot{
 
     }
 
+    public UUID getUuidNull(){
+        return UUID_NULL;
+    }
+
     public void restoreSnapshot(UUID snapshotId) throws IOException, ClassNotFoundException, InterruptedException {
-        Snapshot snapshot = Storage.loadSnapshot(snapshotId, path);
-        if(snapshot != null) {
+        if(snapshotId.equals(UUID_NULL)) { //caso nessuno snapshot salvato
+            LOGGER.info("Resetting to initial state (No snapshots found)");
+            status.resetState();
+            Storage.deleteAllSnapshots(path); //svuota la cartella snapshot
+        }
+        else{ //caso snapshot esistente
+            Snapshot snapshot = Storage.loadSnapshot(snapshotId, path);
+            Storage.deleteSnapshotsAfter(snapshotId,path); //cancella tutti gli snapshot successivi a quello restored
             LOGGER.info("Restoring snapshot " + snapshotId + " ...");
             State new_state = snapshot.getStatus();
             status.setState(new_state);

@@ -40,13 +40,20 @@ public class Storage {
 
     }
 
-    //method to retrieve the snapshot
+    //method to retrieve the snapshot , null if not found
     public static Snapshot loadSnapshot(UUID snapshotId, Path path) throws IOException, ClassNotFoundException {
-        FileInputStream fileIn = new FileInputStream(path + File.separator +"snapshot_" + snapshotId.toString());
+        File file = new File(path + File.separator +"snapshot_" + snapshotId.toString());
+        if (!file.exists()) {
+            // se il file non esiste, ritorna null
+            return null;
+        }
+
+        FileInputStream fileIn = new FileInputStream(file);
         ObjectInputStream in = new ObjectInputStream(fileIn);
         Snapshot snapshot = (Snapshot) in.readObject();
         return snapshot;
     }
+
 
     //method to retrieve last saved snapshot name
     public static String retrieveLastSnapshot(String folderPath) {
@@ -71,6 +78,53 @@ public class Storage {
     }
 
 
+
+    // metodo per eliminare tutti gli snapshot salvati nella cartella
+    public static void deleteAllSnapshots(Path folderPath) throws IOException {
+        // crea un oggetto File che rappresenta la cartella
+        File folder = folderPath.toFile();
+
+        // ottiene la lista dei file nella cartella
+        File[] files = folder.listFiles();
+
+        // elimina tutti i file nella cartella
+        if (files != null) {
+            for (File file : files) {
+                if (!file.isDirectory()) {
+                    file.delete();
+                }
+            }
+        }
+    }
+
+    // metodo per eliminare tutti gli snapshot successivi in ordine cronologico ad uno snapshot dato (escluso quello che gli passo)
+    public static void deleteSnapshotsAfter(UUID snapshotId, Path folderPath) throws IOException {
+        // crea un oggetto File che rappresenta la cartella
+        File folder = folderPath.toFile();
+
+        // ottiene la lista dei file nella cartella
+        File[] files = folder.listFiles();
+
+        // se la cartella è vuota, non fa niente
+        if (files == null || files.length == 0) {
+            return;
+        }
+
+        // ordina la lista di file in ordine cronologico (dal più vecchio al più recente)
+        Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
+
+        // elimina tutti i file successivi a quello con lo snapshotId dato (escluso quello con lo snapshotId dato)
+        boolean delete = false;
+        for (File file : files) {
+            if (!file.isDirectory()) {
+                if (delete) {
+                    file.delete();
+                } else if (file.getName().equals("snapshot_" + snapshotId.toString())) {
+                    delete = true;
+                }
+            }
+        }
+    }
 
     //method to delete the snapshot
 

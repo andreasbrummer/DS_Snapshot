@@ -16,6 +16,8 @@ public class MyState implements State {
         state += message;
     }
 
+    public void resetState(){state=0;} //caso restore senza snapshot salvati
+
     @Override
     public State copy() {
         MyState newState = new MyState();

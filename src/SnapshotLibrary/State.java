@@ -9,4 +9,6 @@ public interface State extends Serializable {
     State copy();
 
     Serializable getState();
+
+    void resetState();
 }

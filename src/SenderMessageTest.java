@@ -27,6 +27,7 @@ public class SenderMessageTest{
         int nodeId = Integer.parseInt(args[0]);
         if (nodeId == 0) {
              distr_snap = new DistributedSnapshot("Snapshot1", listener, state);
+             listener.setDistributedSnapshot(distr_snap);
             while (!distr_snap.init(serverPort1)) {
                 sleep(5000);
                 Logger.getLogger("SenderMessageTest").info("Port " + serverPort1 + " is occupied, waiting 5 seconds");
@@ -34,6 +35,7 @@ public class SenderMessageTest{
             sleep(5000);
         } else if (nodeId == 1) {
             distr_snap = new DistributedSnapshot("Snapshot2", listener, state);
+            listener.setDistributedSnapshot(distr_snap);
             while (!distr_snap.init(serverPort2)) {
                 sleep(1000);
                 Logger.getLogger("SenderMessageTest").info("Port " + serverPort2 + " is occupied, waiting 5 seconds");
@@ -52,17 +54,21 @@ public class SenderMessageTest{
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             Object input = reader.readLine();
 
-            UUID snapshotId = null;
+            //UUID snapshotId = null;
             while (!input.equals("fine")) {
                 if (input.equals("marker")) {
                     distr_snap.startSnapshot();
                 } else if (input.equals("restore")) {
                     UUID lastSnap;
-                    if (nodeId==0){
-                        lastSnap = UUID.fromString(Storage.retrieveLastSnapshot("Snapshot1").substring(9));
+                    String folderPath;
+                    if (nodeId==0){folderPath="Snapshot1";}else{folderPath="Snapshot2";}
+                    String retrievedSnapString = Storage.retrieveLastSnapshot(folderPath);
+                    if(retrievedSnapString==null){ //se non ci sono snapshot salvati
+                        lastSnap= distr_snap.getUuidNull();
                     }else {
-                        lastSnap = UUID.fromString(Storage.retrieveLastSnapshot("Snapshot2").substring(9));
+                        lastSnap = UUID.fromString(retrievedSnapString.substring(9));
                     }
+                    distr_snap.sendMessage(serverAddress, lastSnap);
                     distr_snap.restoreSnapshot(lastSnap);
                 }else {
                     distr_snap.sendMessage(serverAddress, input);
