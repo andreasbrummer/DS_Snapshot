@@ -53,21 +53,20 @@ public class SenderMessageTest{
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             Object input = reader.readLine();
-
+            String folderPath;
             //UUID snapshotId = null;
             while (!input.equals("fine")) {
                 if (input.equals("marker")) {
                     distr_snap.startSnapshot();
                 } else if (input.equals("restore")) {
                     UUID lastSnap;
-                    String folderPath;
-                    if (nodeId==0){folderPath="Snapshot1";}else{folderPath="Snapshot2";}
+                    folderPath =  (nodeId==0 ? "Snapshot1": "Snapshot2");
                     String retrievedSnapString = Storage.retrieveLastSnapshot(folderPath);
-                    if(retrievedSnapString==null){ //se non ci sono snapshot salvati
+                    if(retrievedSnapString==null)//se non ci sono snapshot salvati
                         lastSnap= distr_snap.getUuidNull();
-                    }else {
+                    else
                         lastSnap = UUID.fromString(retrievedSnapString.substring(9));
-                    }
+
                     distr_snap.sendMessage(serverAddress, lastSnap);
                     distr_snap.restoreSnapshot(lastSnap);
                 }else {

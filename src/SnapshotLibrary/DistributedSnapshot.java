@@ -2,19 +2,17 @@ package SnapshotLibrary;
 
 import SnapshotLibrary.Messages.Marker;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketAddress;
+import java.io.*;
+import java.net.*;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
@@ -66,7 +64,7 @@ public class DistributedSnapshot{
     static final int SNAPSHOT_START_DELAY_MS = 5000;
 
     /*  only for testing */
-    static final boolean TEST_MODE = true;
+    static final boolean TEST_MODE = false;
     //TODO capire il discorso delle cartella e dei file (es. se cartella è gia esistente)
     public DistributedSnapshot(Path path) {
         this.path = path;
@@ -82,20 +80,21 @@ public class DistributedSnapshot{
     //TODO: pensare se mettere come argomento del costruttore anche lo status
 
 
-    public boolean init(int serverPortNumber) {
+    public boolean init(int serverPortNumber) throws IOException {
             server = new Server();
             server.start(serverPortNumber);
             LOGGER.info("Server started.");
             return true;
     }
 
+    // close server
+        public void end() throws IOException {
+            closeAllConnections();
+            server.stop();
+            LOGGER.info("Server stopped.");
+        }
 
-    public void end() throws IOException { // close server
-        server.stop();
-        LOGGER.info("Server stopped.");
-    }
-
-    public String installNewConnectionToNode(InetAddress ip, int port) throws IOException {
+    public synchronized String installNewConnectionToNode(InetAddress ip, int port) throws IOException {
         Socket socket = new Socket(ip, port);
         UUID id = UUID.randomUUID();
         outputNodes.put(id, socket);
@@ -103,9 +102,53 @@ public class DistributedSnapshot{
         outputStream.put(id, objectOutput);
         return id.toString();
     }
+    private void closeAllConnections() {
+        ExecutorService executor = Executors.newFixedThreadPool(outputNodes.size());
+
+        for (UUID id : outputNodes.keySet()) {
+            executor.execute(() -> {
+                try {
+                    Socket socket = outputNodes.get(id);
+                    ObjectOutputStream objectOutput = outputStream.get(id);
+
+                    objectOutput.close();
+                    socket.close();
+                    outputNodes.remove(id);
+                    outputStream.remove(id);
+
+                    LOGGER.info("Connection closed with: " + socket.getInetAddress() + " port: " + socket.getPort());
+                } catch (IOException e) {
+                    LOGGER.error("Error closing connection with id: " + id, e);
+                }
+            });
+        }
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            LOGGER.info("All connections closed.");
+        } catch (InterruptedException e) {
+            LOGGER.error("Interrupted while waiting for connection closing threads to finish", e);
+            // Restore interrupted status
+            Thread.currentThread().interrupt();
+        }
+    }
+
 
     public void sendMessage(String node_id, Object msg) throws IOException {
-        outputStream.get(UUID.fromString(node_id)).writeObject(msg);
+        ObjectOutputStream objectOutput = outputStream.get(UUID.fromString(node_id));
+        try {
+            objectOutput.writeObject(msg);
+        } catch (IOException e) {
+            if (e instanceof java.io.EOFException || e instanceof java.net.SocketException) {
+                // Handle the case where the server closed the connection remotely
+                outputNodes.remove(UUID.fromString(node_id));
+                LOGGER.error("Server closed the connection remotely.");
+            } else {
+                // Handle other IOExceptions
+                LOGGER.error("Error sending message to " + node_id, e);
+            }
+        }
     }
 
     public UUID startSnapshot() throws IOException {
@@ -167,57 +210,72 @@ public class DistributedSnapshot{
 
 
 
+ private class Server {
+     private ServerSocket serverSocket;
+     private Thread serverThread;
+     private AtomicBoolean running = new AtomicBoolean(false);
+     List<Thread> nodeHandlerThreads = new ArrayList<>();
+     public void start(int portNumber) throws IOException {
+         if (running.get()) {
+             LOGGER.warn("Server is already running.");
+             return;
+         }
+         serverSocket = new ServerSocket(portNumber);
+         int port = serverSocket.getLocalPort();
+         LOGGER.info("Server started on port " + port);
+         running.set(true);
+         serverThread = new Thread(() -> {
+             while (running.get()) {
+                 try {
+                     Socket socket = serverSocket.accept();
+                     inputNodes.add(socket.getRemoteSocketAddress());
+                     LOGGER.info("New connection established with: " + socket.getInetAddress() + " port:" + socket.getPort());
+                     Thread nodeHandlerThread = new Thread(new NodeHandler(socket), "NodeHandler"+Thread.activeCount());
+                     nodeHandlerThreads.add(nodeHandlerThread);
+                     nodeHandlerThread.start();
+                 } catch (SocketException e) {
+                     if (running.get()) {
+                         LOGGER.error("Error accepting client connection.", e);
+                     }
+                 } catch (IOException e) {
+                     LOGGER.error("Error accepting client connection.", e);
+                 }
+             }
+         });
+         serverThread.start();
+     }
 
-    private class Server {
-        private ServerSocket serverSocket;
-        private Thread serverThread;
-        private boolean running;
+     public void stop() {
+         if (!running.get()) {
+             LOGGER.warn("Server is not running.");
+             return;
+         }
+         running.set(false);
+         try {
+             serverSocket.close();
+             serverThread.interrupt();
+             for (Thread nodeHandlerThread : nodeHandlerThreads) {
+                 LOGGER.info("Interrupting node handler thread: " + nodeHandlerThread.getName());
+                 nodeHandlerThread.interrupt();
+                 nodeHandlerThread.join();
+                 LOGGER.info("Joined node handler thread."+ nodeHandlerThread.getName()+ "out of " + nodeHandlerThreads.size() + "threads");
+             }
+             serverThread.join();
+             LOGGER.info("Server stopped.");
+         } catch (IOException | InterruptedException e) {
+             LOGGER.error("Error stopping server.", e);
+         }
 
-        //controllare se public giusto
-        public void start(int portNumber) { //passare 0 per trovarne una libera
-            try {
-                serverSocket = new ServerSocket(portNumber);
-                int port = serverSocket.getLocalPort();
-                LOGGER.info("Server started on port" + port);
-                running = true;
-                serverThread = new Thread(() -> {
-                    while (running) {
-                        try {
-                            Socket socket = serverSocket.accept();
-                            inputNodes.add(socket.getRemoteSocketAddress());
-                            // Gestisci la connessione del client qui:
-                            LOGGER.info("New connection established with:" + socket.getInetAddress() + " port:" + socket.getPort());
-                            new Thread(new NodeHandler(socket)).start();
+     }
 
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-                serverThread.start();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+     public boolean isRunning() {
+         return running.get();
+     }
 
-        public void stop() throws IOException {
-            try {
-                running = false;
-                serverSocket.close();
-                serverThread.join();
-                LOGGER.info("Server stopped.");
-            } catch (IOException e) {
-                if(!serverSocket.isClosed())
-                    serverSocket.close();
-                LOGGER.error("Error closing server socket", e);
-            } catch (InterruptedException e) {
-                LOGGER.error("Interrupted while waiting for server thread to join", e);
-                // Restore interrupted status
-                Thread.currentThread().interrupt();
-            }
-        }
-
-    }
+     public int getPort() {
+         return serverSocket.getLocalPort();
+     }
+ }
 
 
 
@@ -308,34 +366,43 @@ public class DistributedSnapshot{
                 ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
                 //ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
                 Object inputObject;
-                while ((inputObject = in.readObject()) != null) {
-                    synchronized(messageLock) {
-                        //listener.onMessageReceived(inputObject);
-                        /*Controllo se ho ricevuto un marker*/
-                        if (inputObject instanceof Marker) {
-                            LOGGER.debug("Received a new marker:\n Id: " + ((Marker) inputObject).getSnapshotId());
-                            handleMarker((Marker) inputObject);
-                        } else {
-                            LOGGER.debug("Received a new message: " + inputObject);
-                            handleMessage(inputObject); //Perche lo avevi tolto?
-
-                            //testato che aspetta che la chiamata termini prima di andare avanti
-                            //in realta aspetta anche se non è synchronize
-                            listener.onMessageReceived(inputObject);
-                            //LOGGER.debug("Eccomi sono fuori"); //for test
+                    while ( !Thread.currentThread().isInterrupted()) {
+                        if(in.available() > 0) {
+                            inputObject = in.readObject();
+                            if (inputObject != null) {
+                                synchronized (messageLock) {
+                                    //listener.onMessageReceived(inputObject);
+                                    /*Controllo se ho ricevuto un marker*/
+                                    if (inputObject instanceof Marker) {
+                                        LOGGER.debug("Received a new marker:\n Id: " + ((Marker) inputObject).getSnapshotId());
+                                        handleMarker((Marker) inputObject);
+                                    } else {
+                                        LOGGER.debug("Received a new message: " + inputObject);
+                                        handleMessage(inputObject); //Perche lo avevi tolto?
+                                        //testato che aspetta che la chiamata termini prima di andare avanti
+                                        //in realta aspetta anche se non è synchronize
+                                        listener.onMessageReceived(inputObject);
+                                        //LOGGER.debug("Eccomi sono fuori"); //for test
+                                    }
+                                }
+                            }
                         }
                     }
+            } catch (EOFException e) {
+                // Client closed connection
+                LOGGER.info("Client closed connection: " + clientSocket.getRemoteSocketAddress());
+                // Remove client from input nodes
+                inputNodes.remove(clientSocket.getRemoteSocketAddress());
+                // Close socket
+                try {
+                    clientSocket.close();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
                 }
-            } catch (IOException e) {
-                if (clientSocket.isClosed()) {
-                    // Socket closed by remote host
-                    LOGGER.error("Socket chiuso dal lato remoto.");
-
-                    //TODO: togliere da input_nodes e chiudere questo thread.
-                } else {
-                    // Other I/O errors
-                    e.printStackTrace();
-                }
+            }
+            catch (IOException e) {
+                // Other I/O errors
+                e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }catch (InterruptedException e) {
