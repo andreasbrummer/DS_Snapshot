@@ -4,17 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="code refactor in SenderMessageTest">
-      <change afterPath="$PROJECT_DIR$/src/SnapshotLibrary/NodeConnection.java" afterDir="false" />
+    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="now the NodeHandler waits for a new object for five seconds">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/MyListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/MyListener.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SenderMessageTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SenderMessageTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/Storage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Storage.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Storage.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Storage.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -238,7 +235,14 @@
       <option name="project" value="LOCAL" />
       <updated>1683107152210</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="now the NodeHandler waits for a new object for five seconds">
+      <created>1683122331147</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1683122331147</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -284,7 +288,8 @@
     <MESSAGE value="MyListener&#10;MyState &#10;added" />
     <MESSAGE value="Connections problems fixed" />
     <MESSAGE value="code refactor in SenderMessageTest" />
-    <option name="LAST_COMMIT_MESSAGE" value="code refactor in SenderMessageTest" />
+    <MESSAGE value="now the NodeHandler waits for a new object for five seconds" />
+    <option name="LAST_COMMIT_MESSAGE" value="now the NodeHandler waits for a new object for five seconds" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

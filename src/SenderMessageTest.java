@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -55,6 +56,13 @@ public class SenderMessageTest{
         String serverAddress = distrSnap.installNewConnectionToNode(ipAddress, (nodeId == 0) ? serverPort2 : serverPort1);
         String folderPath= (nodeId == 0 ? "Snapshot1" : "Snapshot2");
 
+        Random rand = new Random();
+        int sum = 0;
+        for (int i = 0; i < 50; i++) {
+            int num = rand.nextInt(101) - 50;
+            distrSnap.sendMessage(serverAddress, num);
+            sum += num;
+        }
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             Object input = reader.readLine();

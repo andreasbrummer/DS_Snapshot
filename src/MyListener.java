@@ -20,7 +20,7 @@ public class MyListener implements MessageListener {
 
     @Override
     public void onMessageReceived(Object message) throws InterruptedException, IOException, ClassNotFoundException {
-        if (message instanceof String) {
+        if (message instanceof String ) {
             String stringMessage = (String) message;
             System.out.println("ricevuto:" + stringMessage);
             try {
@@ -29,6 +29,10 @@ public class MyListener implements MessageListener {
             } catch (NumberFormatException e) {
                 Logger.getLogger("MyListener").warn("Invalid message received: " + stringMessage);
             }
+        }
+        if(message instanceof Integer){
+            Logger.getLogger("MyListener").info("Received message n."+message);
+            state.updateState((Integer)message);
         }
         else if(message instanceof UUID){
             if(distrSnap==null){

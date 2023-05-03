@@ -52,6 +52,8 @@ public class DistributedSnapshot{
     private final List<SocketAddress> inputNodes = new ArrayList<>();
     private final Map<UUID,Snapshot> snapshots = new HashMap<>();
     private final Map<UUID,Socket> outputNodes = new HashMap<>();
+    private final List<NodeConnection> nodeConnections = new ArrayList<>();
+
     private final Map<UUID,ObjectOutputStream> outputStream = new HashMap<>();
     private static final Log LOGGER = LogFactory.getLog(DistributedSnapshot.class);
 
@@ -77,7 +79,6 @@ public class DistributedSnapshot{
     public DistributedSnapshot() {
         this.path = Storage.createFolder("Snapshots");
     }
-    //TODO: pensare se mettere come argomento del costruttore anche lo status
 
 
     public boolean init(int serverPortNumber) throws IOException {
@@ -95,13 +96,15 @@ public class DistributedSnapshot{
         }
 
     public synchronized String installNewConnectionToNode(InetAddress ip, int port) throws IOException {
+
         Socket socket = new Socket(ip, port);
         UUID id = UUID.randomUUID();
-        outputNodes.put(id, socket);
         ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
         outputStream.put(id, objectOutput);
         return id.toString();
     }
+
+
     private void closeAllConnections() {
         ExecutorService executor = Executors.newFixedThreadPool(outputNodes.size());
 
@@ -143,7 +146,7 @@ public class DistributedSnapshot{
         } catch (IOException e) {
             if (e instanceof java.io.EOFException || e instanceof java.net.SocketException) {
                 // Handle the case where the server closed the connection remotely
-                outputNodes.remove(UUID.fromString(node_id));
+                //outputNodes.remove(UUID.fromString(node_id));
                 LOGGER.error("Server closed the connection remotely.");
             } else {
                 // Handle other IOExceptions
