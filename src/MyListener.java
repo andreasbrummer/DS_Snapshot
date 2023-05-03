@@ -14,7 +14,7 @@ public class MyListener implements MessageListener {
         this.state = state;
     }
 
-    public void setDistributedSnapshot(DistributedSnapshot distr_snap){
+    public void setDistributedSnapshot(DistributedSnapshot distrSnap){
         this.distrSnap = distrSnap;
     }
 
@@ -31,6 +31,12 @@ public class MyListener implements MessageListener {
             }
         }
         else if(message instanceof UUID){
+            if(distrSnap==null){
+                Logger.getLogger("MyListener").info("Received restore request n."+message+" but no distributed snapshot is setted");
+                //state.resetState();
+                return;
+            }
+            Logger.getLogger("MyListener").info("Received restore request n."+message);
             distrSnap.restoreSnapshot((UUID)message);
         }
 

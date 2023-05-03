@@ -32,10 +32,8 @@ public class Storage {
     public static void  storeSnapshot(Snapshot snapshot,Path path) {
         try (FileOutputStream out = new FileOutputStream(path + File.separator + "snapshot_" + snapshot.getSnapshotId().toString())) {
             out.write(SerializationUtils.serialize(snapshot));
-
         } catch (IOException e) {
             throw new RuntimeException(e);
-
         }
 
     }
@@ -56,7 +54,7 @@ public class Storage {
 
 
     //method to retrieve last saved snapshot name
-    public static String retrieveLastSnapshot(String folderPath) {
+    public static UUID getLastSnapshotId(String folderPath) {
         // crea un oggetto File che rappresenta la cartella
         File folder = new File(folderPath);
 
@@ -65,7 +63,7 @@ public class Storage {
 
         // se la cartella è vuota, restituisci null
         if (files == null || files.length == 0) {
-            return null;
+            return DistributedSnapshot.getUuidNull();
         }
 
         // ordina la lista di file in ordine cronologico (dal più vecchio al più recente)
@@ -74,7 +72,10 @@ public class Storage {
         // ottiene il nome del primo file in ordine cronologico
         String firstFileName = files[files.length-1].getName();
 
-        return firstFileName;
+
+
+
+        return UUID.fromString(firstFileName.substring(9));
     }
 
 
@@ -125,14 +126,6 @@ public class Storage {
             }
         }
     }
-
-    //method to delete the snapshot
-
-    //method to delete all the snapshots
-
-    //method to delete the folder
-
-
 
 
 

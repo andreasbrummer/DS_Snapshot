@@ -179,31 +179,35 @@ public class DistributedSnapshot{
 
     }
 
-    public UUID getUuidNull(){
+    public static UUID getUuidNull(){
         return UUID_NULL;
     }
 
     public void restoreSnapshot(UUID snapshotId) throws IOException, ClassNotFoundException, InterruptedException {
-        //No snapshot found
-        if(snapshotId.equals(UUID_NULL)) {
-            LOGGER.info("Resetting to initial state (No snapshots found)");
-            status.resetState();
-            Storage.deleteAllSnapshots(path); //svuota la cartella snapshot
-        }
-        //Snapshot already exists
-        else{
-            Snapshot snapshot = Storage.loadSnapshot(snapshotId, path);
-            Storage.deleteSnapshotsAfter(snapshotId,path); //cancella tutti gli snapshot successivi a quello restored
-            LOGGER.info("Restoring snapshot " + snapshotId + " ...");
-            State new_state = snapshot.getStatus();
-            status.setState(new_state);
-            LOGGER.info("Restoring: State of the saved snapshot: " + status.getState());
-            List<Pair<SocketAddress,Object>> nodeMessages = snapshot.getNodeMessages();
-            while(!snapshot.getNodeMessages().isEmpty()) {
-                Pair<SocketAddress, Object> pair = nodeMessages.remove(0);
-                listener.onMessageReceived(pair.getRight());
+        try {
+            //No snapshot found
+            if (snapshotId.equals(UUID_NULL)) {
+                LOGGER.info("Resetting to initial state (No snapshots found)");
+                status.resetState();
+                Storage.deleteAllSnapshots(path); //svuota la cartella snapshot
             }
-            LOGGER.info("Restoring: State after the incoming messages in the snapshot: " + status.getState());
+            //Snapshot already exists
+            else {
+                Snapshot snapshot = Storage.loadSnapshot(snapshotId, path);
+                Storage.deleteSnapshotsAfter(snapshotId, path); //cancella tutti gli snapshot successivi a quello restored
+                LOGGER.info("Restoring snapshot " + snapshotId + " ...");
+                State new_state = snapshot.getStatus();
+                status.setState(new_state);
+                LOGGER.info("Restoring: State of the saved snapshot: " + status.getState());
+                List<Pair<SocketAddress, Object>> nodeMessages = snapshot.getNodeMessages();
+                while (!snapshot.getNodeMessages().isEmpty()) {
+                    Pair<SocketAddress, Object> pair = nodeMessages.remove(0);
+                    listener.onMessageReceived(pair.getRight());
+                }
+                LOGGER.info("Restoring: State after the incoming messages in the snapshot: " + status.getState());
+            }
+        }catch (NullPointerException e){
+            LOGGER.error("Error restoring snapshot " + snapshotId + " ...", e);
         }
     }
 
@@ -233,7 +237,7 @@ public class DistributedSnapshot{
                      Socket socket = serverSocket.accept();
                      inputNodes.add(socket.getRemoteSocketAddress());
                      LOGGER.info("New connection established with: " + socket.getInetAddress() + " port:" + socket.getPort());
-                     Thread nodeHandlerThread = new Thread(new NodeHandler(socket), "NodeHandler"+Thread.activeCount());
+                     Thread nodeHandlerThread = new Thread(new NodeHandler(socket), "NodeHandler-"+Thread.activeCount());
                      nodeHandlerThreads.add(nodeHandlerThread);
                      nodeHandlerThread.start();
                  } catch (SocketException e) {
@@ -258,10 +262,11 @@ public class DistributedSnapshot{
              serverSocket.close();
              serverThread.interrupt();
              for (Thread nodeHandlerThread : nodeHandlerThreads) {
-                 LOGGER.info("Interrupting node handler thread: " + nodeHandlerThread.getName());
+                 LOGGER.debug("Interrupting node handler thread: " + nodeHandlerThread.getName());
                  nodeHandlerThread.interrupt();
+                 LOGGER.debug("Interrupted node handler thread: " + nodeHandlerThread.getName());
                  nodeHandlerThread.join();
-                 LOGGER.info("Joined node handler thread."+ nodeHandlerThread.getName()+ "out of " + nodeHandlerThreads.size() + "threads");
+                 LOGGER.debug("Joined node handler thread."+ nodeHandlerThread.getName()+ "out of " + nodeHandlerThreads.size() + "threads");
              }
              serverThread.join();
              LOGGER.info("Server stopped.");
@@ -362,18 +367,34 @@ public class DistributedSnapshot{
                 }
             }
         }
-
+        private void handleEOFException(EOFException e) {
+            // Client closed connection
+            LOGGER.info("Client closed connection: " + clientSocket.getRemoteSocketAddress());
+            // Remove client from input nodes
+            inputNodes.remove(clientSocket.getRemoteSocketAddress());
+        }
+        private void handleInterruptedException(InterruptedException e) {
+            // Thread interrupted
+            LOGGER.debug("Node handler thread interrupted.");
+            Thread.currentThread().interrupt();
+        }
         @Override
         public void run() {
             try {
+                clientSocket.setSoTimeout(5000);
                 ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
                 Object inputObject;
                     while ( !Thread.currentThread().isInterrupted()) {
-                        if(in.available() > 0) {
-                            inputObject = in.readObject();
+                            //LOGGER.debug("Waiting for a new message...");
+                            try{
+                                inputObject = in.readObject();
+                            }catch (SocketTimeoutException e){
+                                //LOGGER.debug("Timeout");
+                                continue;
+                            }
+                            //LOGGER.debug("Received a new message...");
                             if (inputObject != null) {
                                 synchronized (messageLock) {
-                                    //listener.onMessageReceived(inputObject);
                                     /*Controllo se ho ricevuto un marker*/
                                     if (inputObject instanceof Marker) {
                                         LOGGER.debug("Received a new marker:\n Id: " + ((Marker) inputObject).getSnapshotId());
@@ -385,32 +406,19 @@ public class DistributedSnapshot{
                                     }
                                 }
                             }
-                        }
-                        Thread.sleep(1000);
                     }
-            } catch (EOFException e) {
-                // Client closed connection
-                LOGGER.info("Client closed connection: " + clientSocket.getRemoteSocketAddress());
-                // Remove client from input nodes
-                inputNodes.remove(clientSocket.getRemoteSocketAddress());
-                // Close socket
-                try {
-                    clientSocket.close();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
             }
-            catch (IOException e) {
+            catch (EOFException e) {
+                handleEOFException(e);
+            } catch (InterruptedException e) {
+                handleInterruptedException(e);
+            } catch (IOException | ClassNotFoundException e) {
                 // Other I/O errors
                 e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }catch (InterruptedException e) {
-                throw new RuntimeException(e);
             } finally {
                 // Socket closing
                 try {
-                    clientSocket.close(); //IN TEORIA NON DOBBIAMO CHIUDERE NOI IL SOCKET DEL CLIENT. DEVE CHIUDERLO IL CLIENT
+                    clientSocket.close();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

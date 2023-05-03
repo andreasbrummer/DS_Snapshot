@@ -31,6 +31,7 @@ public class SenderMessageTest{
         if (nodeId == 0) {
              distrSnap = new DistributedSnapshot("Snapshot1", listener, state);
              listener.setDistributedSnapshot(distrSnap);
+            Logger.getLogger("SenderMessageTest"+nodeId+1).info("Setted listener");
             while (!distrSnap.init(serverPort1)) {
                 sleep(5000);
                 Logger.getLogger("SenderMessageTest1").info("Port " + serverPort1 + " is occupied, waiting 5 seconds");
@@ -39,6 +40,7 @@ public class SenderMessageTest{
         } else if (nodeId == 1) {
             distrSnap = new DistributedSnapshot("Snapshot2", listener, state);
             listener.setDistributedSnapshot(distrSnap);
+            Logger.getLogger("SenderMessageTest"+nodeId+1).info("Setted listener");
             while (!distrSnap.init(serverPort2)) {
                 sleep(1000);
                 Logger.getLogger("SenderMessageTest2").info("Port " + serverPort2 + " is occupied, waiting 5 seconds");
@@ -61,8 +63,7 @@ public class SenderMessageTest{
                 if (input.equals("marker"))
                     distrSnap.startSnapshot();
                 else if (input.equals("restore")) {
-                    String retrievedSnapString = Storage.retrieveLastSnapshot(folderPath);
-                    lastSnap =( retrievedSnapString == null ? distrSnap.getUuidNull() : UUID.fromString(retrievedSnapString.substring(9)));
+                    lastSnap = Storage.getLastSnapshotId(folderPath);
                     distrSnap.sendMessage(serverAddress, lastSnap);
                     distrSnap.restoreSnapshot(lastSnap);
                 }else
