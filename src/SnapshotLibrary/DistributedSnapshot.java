@@ -138,6 +138,7 @@ public class DistributedSnapshot{
     public void sendMessage(String node_id, Object msg) throws IOException {
         ObjectOutputStream objectOutput = outputStream.get(UUID.fromString(node_id));
         try {
+            LOGGER.debug("Sending message to " + node_id);
             objectOutput.writeObject(msg);
         } catch (IOException e) {
             if (e instanceof java.io.EOFException || e instanceof java.net.SocketException) {
@@ -154,9 +155,10 @@ public class DistributedSnapshot{
     public UUID startSnapshot() throws IOException {
         UUID snapshotId = UUID.randomUUID();
         Marker marker = new Marker(snapshotId);
-        State stateToStore = status.copy(); // Copia lo stato di status in stateToStore (altrimenti finche non faccio lo store, se ricevo i messaggi viene modificato)
+        // Copia lo stato di status in stateToStore (altrimenti finche non faccio lo store, se ricevo i messaggi viene modificato)
+        State stateToStore = status.copy();
         snapshots.put(marker.getSnapshotId(), new Snapshot(marker.getSnapshotId(), stateToStore ,new ArrayList<>(inputNodes)));
-        //LOGGER.info("Starting snapshot " + input_nodes); //only for test
+        LOGGER.debug("Starting snapshot " + inputNodes);
 
         // send marker to all nodes
         for (ObjectOutputStream objectOutput : outputStream.values()) {
@@ -169,7 +171,6 @@ public class DistributedSnapshot{
         LOGGER.info("Snapshot " + snapshot.getSnapshotId() + " ended.");
         Storage.storeSnapshot(snapshot, path);
         snapshots.remove(snapshot.getSnapshotId());
-        // test
         if(TEST_MODE) {
             LOGGER.debug("Printing snapshot... " );
             LOGGER.debug(snapshot.toString());
@@ -183,12 +184,14 @@ public class DistributedSnapshot{
     }
 
     public void restoreSnapshot(UUID snapshotId) throws IOException, ClassNotFoundException, InterruptedException {
-        if(snapshotId.equals(UUID_NULL)) { //caso nessuno snapshot salvato
+        //No snapshot found
+        if(snapshotId.equals(UUID_NULL)) {
             LOGGER.info("Resetting to initial state (No snapshots found)");
             status.resetState();
             Storage.deleteAllSnapshots(path); //svuota la cartella snapshot
         }
-        else{ //caso snapshot esistente
+        //Snapshot already exists
+        else{
             Snapshot snapshot = Storage.loadSnapshot(snapshotId, path);
             Storage.deleteSnapshotsAfter(snapshotId,path); //cancella tutti gli snapshot successivi a quello restored
             LOGGER.info("Restoring snapshot " + snapshotId + " ...");
@@ -364,7 +367,6 @@ public class DistributedSnapshot{
         public void run() {
             try {
                 ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
-                //ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
                 Object inputObject;
                     while ( !Thread.currentThread().isInterrupted()) {
                         if(in.available() > 0) {
@@ -378,15 +380,13 @@ public class DistributedSnapshot{
                                         handleMarker((Marker) inputObject);
                                     } else {
                                         LOGGER.debug("Received a new message: " + inputObject);
-                                        handleMessage(inputObject); //Perche lo avevi tolto?
-                                        //testato che aspetta che la chiamata termini prima di andare avanti
-                                        //in realta aspetta anche se non è synchronize
+                                        handleMessage(inputObject);
                                         listener.onMessageReceived(inputObject);
-                                        //LOGGER.debug("Eccomi sono fuori"); //for test
                                     }
                                 }
                             }
                         }
+                        Thread.sleep(1000);
                     }
             } catch (EOFException e) {
                 // Client closed connection

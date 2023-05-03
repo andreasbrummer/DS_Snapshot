@@ -15,72 +15,65 @@ public class SenderMessageTest{
     public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
         int serverPort1 = 24071;
         int serverPort2 = 24079;
-        DistributedSnapshot distr_snap = null;
+        DistributedSnapshot distrSnap = null;
         MyState state = new MyState();
         MessageListener listener = new MyListener(state);
-        System.out.println("Starting SenderMessageTest");
+        UUID lastSnap ;
+
+        Logger.getLogger("SendereMessageTest").info("Starting SenderMessageTest");
         if (args.length == 0) {
-            System.err.println("Please specify a node ID (0 or 1)");
+            Logger.getLogger("SendereMessageTest").info("Please specify a node ID (0 or 1)");
             System.exit(1);
         }
 
         int nodeId = Integer.parseInt(args[0]);
+
         if (nodeId == 0) {
-             distr_snap = new DistributedSnapshot("Snapshot1", listener, state);
-             listener.setDistributedSnapshot(distr_snap);
-            while (!distr_snap.init(serverPort1)) {
+             distrSnap = new DistributedSnapshot("Snapshot1", listener, state);
+             listener.setDistributedSnapshot(distrSnap);
+            while (!distrSnap.init(serverPort1)) {
                 sleep(5000);
-                Logger.getLogger("SenderMessageTest").info("Port " + serverPort1 + " is occupied, waiting 5 seconds");
+                Logger.getLogger("SenderMessageTest1").info("Port " + serverPort1 + " is occupied, waiting 5 seconds");
             }
             sleep(5000);
         } else if (nodeId == 1) {
-            distr_snap = new DistributedSnapshot("Snapshot2", listener, state);
-            listener.setDistributedSnapshot(distr_snap);
-            while (!distr_snap.init(serverPort2)) {
+            distrSnap = new DistributedSnapshot("Snapshot2", listener, state);
+            listener.setDistributedSnapshot(distrSnap);
+            while (!distrSnap.init(serverPort2)) {
                 sleep(1000);
-                Logger.getLogger("SenderMessageTest").info("Port " + serverPort2 + " is occupied, waiting 5 seconds");
+                Logger.getLogger("SenderMessageTest2").info("Port " + serverPort2 + " is occupied, waiting 5 seconds");
             }
         } else {
-            System.err.println("Invalid node ID (must be 0 or 1)");
+            Logger.getLogger("SenderMessageTest").warning("Invalid node ID (must be 0 or 1)");
             System.exit(1);
         }
 
 
         InetAddress ipAddress = InetAddress.getByName("127.0.0.1");
-        String serverAddress = distr_snap.installNewConnectionToNode(ipAddress, (nodeId == 0) ? serverPort2 : serverPort1);
-
+        String serverAddress = distrSnap.installNewConnectionToNode(ipAddress, (nodeId == 0) ? serverPort2 : serverPort1);
+        String folderPath= (nodeId == 0 ? "Snapshot1" : "Snapshot2");
 
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             Object input = reader.readLine();
-            String folderPath;
-            //UUID snapshotId = null;
-            while (!input.equals("fine")) {
-                if (input.equals("marker")) {
-                    distr_snap.startSnapshot();
-                } else if (input.equals("restore")) {
-                    UUID lastSnap;
-                    folderPath =  (nodeId==0 ? "Snapshot1": "Snapshot2");
-                    String retrievedSnapString = Storage.retrieveLastSnapshot(folderPath);
-                    if(retrievedSnapString==null)//se non ci sono snapshot salvati
-                        lastSnap= distr_snap.getUuidNull();
-                    else
-                        lastSnap = UUID.fromString(retrievedSnapString.substring(9));
 
-                    distr_snap.sendMessage(serverAddress, lastSnap);
-                    distr_snap.restoreSnapshot(lastSnap);
-                }else {
-                    distr_snap.sendMessage(serverAddress, input);
-                }
-                System.out.println("APP: Stato attuale: " + state.getState());
+            while (!input.equals("fine")) {
+                if (input.equals("marker"))
+                    distrSnap.startSnapshot();
+                else if (input.equals("restore")) {
+                    String retrievedSnapString = Storage.retrieveLastSnapshot(folderPath);
+                    lastSnap =( retrievedSnapString == null ? distrSnap.getUuidNull() : UUID.fromString(retrievedSnapString.substring(9)));
+                    distrSnap.sendMessage(serverAddress, lastSnap);
+                    distrSnap.restoreSnapshot(lastSnap);
+                }else
+                    distrSnap.sendMessage(serverAddress, input);
+                Logger.getLogger("SendereMessageTest"+nodeId+1).info("Stato attuale: " + state.getState());
                 input = reader.readLine();
             }
         }
 
-
-
-        System.out.println("Program closed");
-        distr_snap.end();
+        distrSnap.end();
+        Logger.getLogger("SendereMessageTest"+nodeId+1).info("Program closed");
     }
 
 }
