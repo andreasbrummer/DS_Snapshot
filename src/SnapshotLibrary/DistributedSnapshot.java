@@ -95,17 +95,49 @@ public class DistributedSnapshot{
             LOGGER.info("Server stopped.");
         }
 
-    public synchronized String installNewConnectionToNode(InetAddress ip, int port) throws IOException {
+    public  synchronized String installNewConnectionToNode(InetAddress ip, int port) throws IOException {
 
         Socket socket = new Socket(ip, port);
         UUID id = UUID.randomUUID();
+        for(Socket s : outputNodes.values()){
+            if(s.getInetAddress().equals(ip) && s.getPort() == port){
+                LOGGER.error("Connection already exists with: " + ip + " port: " + port);
+                return null;
+            }
+        }
         outputNodes.put(id, socket);
+        LOGGER.debug("added node with id: " + id);
         ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
         outputStream.put(id, objectOutput);
         return id.toString();
     }
 
+    public synchronized void reconnectToNode(String nodeId,InetAddress ip, int port) throws IOException {
+        Socket socket = new Socket(ip, port);
+        UUID id = UUID.fromString(nodeId);
+        for(Socket s : outputNodes.values()){
+            if(s.getInetAddress().equals(ip) && s.getPort() == port){
+                LOGGER.error("Connection already exists with: " + ip + " port: " + port);
+                return;
+            }
+        }
+        outputNodes.put(id, socket);
+        LOGGER.debug("added node with id: " + id);
+        ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
+        outputStream.put(id, objectOutput);
+    }
 
+    public synchronized void closeConnection(String node_id) throws IOException {
+        UUID id = UUID.fromString(node_id);
+        Socket socket = outputNodes.get(id);
+        ObjectOutputStream objectOutput = outputStream.get(id);
+        objectOutput.close();
+        socket.close();
+        outputNodes.remove(id);
+        outputStream.remove(id);
+
+        LOGGER.info("Connection closed with: " + socket.getInetAddress() + " port: " + socket.getPort());
+    }
 
 
     private void closeAllConnections() {
@@ -155,6 +187,8 @@ public class DistributedSnapshot{
                 // Handle other IOExceptions
                 LOGGER.error("Error sending message to " + node_id, e);
             }
+        } catch (NullPointerException e) {
+            LOGGER.error("Error sending message to " + node_id+ ", invalid address.");
         }
     }
 
@@ -165,10 +199,16 @@ public class DistributedSnapshot{
         State stateToStore = status.copy();
         snapshots.put(marker.getSnapshotId(), new Snapshot(marker.getSnapshotId(), stateToStore ,new ArrayList<>(inputNodes)));
         LOGGER.debug("Starting snapshot " + inputNodes);
+        LOGGER.debug("Snapshot id: " + snapshotId);
 
         // send marker to all nodes
         for (ObjectOutputStream objectOutput : outputStream.values()) {
+            LOGGER.debug("Sending marker to " + objectOutput);
             objectOutput.writeObject(marker);
+        }
+        if(outputStream.size() == 0) {
+            LOGGER.debug("No nodes connected, ending snapshot.");
+            endSnapshot(snapshots.get(snapshotId));
         }
         return snapshotId;
     }
@@ -421,11 +461,16 @@ public class DistributedSnapshot{
                 handleInterruptedException(e);
             } catch (IOException | ClassNotFoundException e) {
                 // Other I/O errors
+                if(clientSocket.isClosed())
+                    LOGGER.debug("Client closed connection: " + clientSocket.getRemoteSocketAddress());
+                else
+                    LOGGER.error("Error handling client connection.", e);
                 e.printStackTrace();
             } finally {
                 // Socket closing
                 try {
                     clientSocket.close();
+                    inputNodes.remove(clientSocket.getRemoteSocketAddress());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

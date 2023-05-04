@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.UUID;
 
 /* this class is used to store the snapshots in a folder */
@@ -79,7 +80,24 @@ public class Storage {
     }
 
 
+    public static void deleteSnapshot(Path folderPath, UUID snapshotId) throws IOException {
+        // crea un oggetto File che rappresenta la cartella
+        File folder = folderPath.toFile();
 
+        // ottiene la lista dei file nella cartella
+        File[] files = folder.listFiles();
+
+        // se la cartella è vuota, non fa niente
+        if (files == null || files.length == 0) {
+            return;
+        }
+        // elimina tutti i file nella cartella
+        for (File file : files) {
+            if (!file.isDirectory() && file.getName().equals("snapshot_" + snapshotId.toString())) {
+                file.delete();
+            }
+        }
+    }
     // metodo per eliminare tutti gli snapshot salvati nella cartella
     public static void deleteAllSnapshots(Path folderPath) throws IOException {
         // crea un oggetto File che rappresenta la cartella

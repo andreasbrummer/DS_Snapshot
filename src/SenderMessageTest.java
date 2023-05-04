@@ -23,9 +23,13 @@ public class SenderMessageTest{
     private static final String INPUT_STATE = "state";
     private static final String INPUT_SUM = "sum";
     private static final String INPUT_EXIT = "fine";
+    private static final String OPEN_CONNECTION = "open";
+
+    private static final String CLOSE_CONNECTION = "close";
+    private static int serverPort1 = 24071;
+    private static int serverPort2 = 24079;
     public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
-        int serverPort1 = 24071;
-        int serverPort2 = 24079;
+
         DistributedSnapshot distrSnap = null;
         MyState state = new MyState();
         MessageListener listener = new MyListener(state);
@@ -127,7 +131,14 @@ public class SenderMessageTest{
     private static void logSum(int sum,int nodeId) {
         Logger.getLogger("SendereMessageTest" + nodeId + 1).info("Somma attuale: " + sum);
     }
-
+    public static void openConnection(String ServerAddress,DistributedSnapshot distrSnap, int nodeId) throws IOException {
+        Logger.getLogger("SendereMessageTest").info("Opening connection to " + InetAddress.getByName("127.0.0.1"));
+        try {
+        distrSnap.reconnectToNode(ServerAddress,InetAddress.getByName("127.0.0.1"), (nodeId == 0) ? serverPort2 : serverPort1);
+        } catch (ConnectException e) {
+            Logger.getLogger("SendereMessageTest").warning("Connection refused");
+        }
+    }
     private static void handleInput(String input, BufferedReader reader, DistributedSnapshot distrSnap, String serverAddress, Random rand, int nodeId, MyState state,String folderPath,int sum) throws IOException, ClassNotFoundException, InterruptedException {
         switch (input) {
             case INPUT_MARKER:
@@ -145,6 +156,12 @@ public class SenderMessageTest{
             case INPUT_EXIT:
                 // Do nothing, just exit the loop
                 break;
+            case CLOSE_CONNECTION:
+                    distrSnap.closeConnection(serverAddress);
+                    break;
+            case OPEN_CONNECTION:
+                    openConnection(serverAddress,distrSnap,nodeId);
+                    break;
             default:
                 Logger.getLogger("SendereMessageTest" + nodeId + 1).info("Comando non riconosciuto");
                 break;
