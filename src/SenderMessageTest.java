@@ -5,21 +5,31 @@ import SnapshotLibrary.Storage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import static java.lang.Thread.sleep;
 
 public class SenderMessageTest{
+
+    private static final String INPUT_MARKER = "marker";
+    private static final String INPUT_RESTORE = "restore";
+    private static final String INPUT_MESSAGE = "message";
+    private static final String INPUT_STATE = "state";
+    private static final String INPUT_SUM = "sum";
+    private static final String INPUT_EXIT = "fine";
     public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
         int serverPort1 = 24071;
         int serverPort2 = 24079;
         DistributedSnapshot distrSnap = null;
         MyState state = new MyState();
         MessageListener listener = new MyListener(state);
-        UUID lastSnap ;
+
 
         Logger.getLogger("SendereMessageTest").info("Starting SenderMessageTest");
         if (args.length == 0) {
@@ -58,31 +68,87 @@ public class SenderMessageTest{
 
         Random rand = new Random();
         int sum = 0;
-        for (int i = 0; i < 50; i++) {
-            int num = rand.nextInt(101) - 50;
-            distrSnap.sendMessage(serverAddress, num);
-            sum += num;
-        }
+
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             Object input = reader.readLine();
 
-            while (!input.equals("fine")) {
-                if (input.equals("marker"))
-                    distrSnap.startSnapshot();
-                else if (input.equals("restore")) {
-                    lastSnap = Storage.getLastSnapshotId(folderPath);
-                    distrSnap.sendMessage(serverAddress, lastSnap);
-                    distrSnap.restoreSnapshot(lastSnap);
-                }else
-                    distrSnap.sendMessage(serverAddress, input);
-                Logger.getLogger("SendereMessageTest"+nodeId+1).info("Stato attuale: " + state.getState());
+            while (!input.equals(INPUT_EXIT)) {
+                handleInput((String) input, reader, distrSnap, serverAddress, rand, nodeId,state,folderPath,sum);
                 input = reader.readLine();
             }
+
         }
 
         distrSnap.end();
         Logger.getLogger("SendereMessageTest"+nodeId+1).info("Program closed");
+    }
+
+    private static void restoreSnapshot(DistributedSnapshot distrSnap, String folderPath, String serverAddress) throws IOException, ClassNotFoundException, InterruptedException {
+        UUID lastSnap ;
+        lastSnap = Storage.getLastSnapshotId(folderPath);
+        distrSnap.sendMessage(serverAddress, lastSnap);
+        distrSnap.restoreSnapshot(lastSnap);
+    }
+
+    private static void sendMessage(DistributedSnapshot distrSnap, String serverAddress, Random rand,int nodeId) throws IOException, InterruptedException {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            int sum = 0;
+            for (int i = 0; i < 10; i++) {
+                int num = rand.nextInt(101) - 50;
+                try {
+                    distrSnap.sendMessage(serverAddress, num);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                sum += num;
+            }
+            logSum(sum, nodeId);
+        });
+        executor.shutdown();
+        new Thread(() -> {
+            try {
+                Thread.sleep(rand.nextInt(10000) );
+                distrSnap.startSnapshot();
+            } catch (InterruptedException | IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+    }
+    private static void logState(int nodeId, MyState state) {
+        Logger.getLogger("SendereMessageTest" + nodeId + 1).info("Stato attuale: " + state.getState());
+    }
+    private static void logSum(int sum,int nodeId) {
+        Logger.getLogger("SendereMessageTest" + nodeId + 1).info("Somma attuale: " + sum);
+    }
+
+    private static void handleInput(String input, BufferedReader reader, DistributedSnapshot distrSnap, String serverAddress, Random rand, int nodeId, MyState state,String folderPath,int sum) throws IOException, ClassNotFoundException, InterruptedException {
+        switch (input) {
+            case INPUT_MARKER:
+                distrSnap.startSnapshot();
+                break;
+            case INPUT_RESTORE:
+                restoreSnapshot(distrSnap, folderPath,serverAddress);
+                break;
+            case INPUT_MESSAGE:
+                sendMessage(distrSnap, serverAddress, rand,nodeId);
+                break;
+            case INPUT_STATE:
+                logState(nodeId,state);
+                break;
+            case INPUT_EXIT:
+                // Do nothing, just exit the loop
+                break;
+            default:
+                Logger.getLogger("SendereMessageTest" + nodeId + 1).info("Comando non riconosciuto");
+                break;
+        }
     }
 
 }

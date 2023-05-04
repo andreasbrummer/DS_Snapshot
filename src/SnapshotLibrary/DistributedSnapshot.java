@@ -99,10 +99,13 @@ public class DistributedSnapshot{
 
         Socket socket = new Socket(ip, port);
         UUID id = UUID.randomUUID();
+        outputNodes.put(id, socket);
         ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
         outputStream.put(id, objectOutput);
         return id.toString();
     }
+
+
 
 
     private void closeAllConnections() {
@@ -310,6 +313,7 @@ public class DistributedSnapshot{
             if (snapshots.containsKey(snapshotId)) {
                 // Case: snapshot in progress
                 snapshot = snapshots.get(snapshotId);
+                LOGGER.debug("Snapshot " + snapshotId + " in progress.");
             } else {
                 // Case: starting snapshot
                 LOGGER.info("Starting snapshot " + snapshotId);
