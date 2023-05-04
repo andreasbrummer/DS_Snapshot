@@ -23,7 +23,7 @@ public class main {
                 System.err.println("Could not create folder");
                 e.printStackTrace();
             }
-        ds.init();
+        ds.init(0);
 
         //System.out.println("ora invio un messaggio: ");
         //sendMessage("Hello Snapshot", "127.0.0.1", 6942);

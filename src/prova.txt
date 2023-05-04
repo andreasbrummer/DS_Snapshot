@@ -59,3 +59,48 @@ state     3                   state 15
 S state 3
 7-6-m-5-4-3
 
+//import java.util.ArrayList;
+//        import java.util.HashMap;
+//        import java.util.List;
+//        import java.util.Map;
+//
+//public class MessageReceiver {
+//    private Map<String, List<String>> messagesByNode = new HashMap<>();
+//
+//    public void receiveMessage(String message, String nodeAddress) {
+//        if (!messagesByNode.containsKey(nodeAddress)) {
+//            messagesByNode.put(nodeAddress, new ArrayList<>());
+//        }
+//        messagesByNode.get(nodeAddress).add(message);
+//    }
+//}
+//
+//
+//import java.io.IOException;
+//        import java.io.OutputStream;
+//        import java.net.Socket;
+//
+//public class MessageSender {
+//    public void sendMessage(String message, String nodeAddress, int portNumber) {
+//        try {
+//            Socket socket = new Socket(nodeAddress, portNumber);
+//            OutputStream out = socket.getOutputStream();
+//
+//            out.write(message.getBytes());
+//            out.flush();
+//
+//            socket.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+//}
+
+//CASO CLIENT SI SPEGNE IMPROVVISAMENTE
+Se il client si chiude improvvisamente senza chiudere correttamente la connessione, il metodo isClosed() restituirà ancora false, anche se il socket del client non è più in grado di ricevere o inviare dati.
+
+Ciò accade perché il socket del client rimane aperto fino a quando non viene chiuso correttamente, ad esempio tramite la chiamata del metodo close() sul socket.
+
+Per verificare se la connessione è stata interrotta a causa di un errore o di una disconnessione non corretta, è necessario utilizzare un altro metodo come isConnected() o isInputShutdown(), che possono essere utilizzati per verificare lo stato del socket e capire se ci sono errori di connessione.
+
+Ad esempio, il metodo isConnected() restituirà false se il socket del client è stato chiuso o non è stato mai aperto, mentre il metodo isInputShutdown() restituirà true se il socket del client è stato chiuso in modo corretto o se è stato interrotto a causa di un errore o di una disconnessione non corretta.

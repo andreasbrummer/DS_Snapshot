@@ -7,24 +7,18 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.UUID;
 
 /* this class is used to store the snapshots in a folder */
 public class Storage {
 
-    // the folder where the snapshots are stored
-    private String folderName = "snapshots";
-
-    // used to set the folder name
-    public Storage() {
-        createFolder(folderName);
-    }
-    public static void createFolder(String folderName) {
+    public static Path createFolder(String folderName) {
+        Path path = Paths.get(folderName);
         try {
-            Path path = Paths.get(folderName);
             if (!Files.exists(path)) {
                 try {
-                    System.out.println("Creating folder");
+                    System.out.println("Creating folder...");
                     Files.createDirectory(path);
                 } catch (FileAlreadyExistsException ignored) {}
             }
@@ -32,45 +26,106 @@ public class Storage {
             System.err.println("Could not create folder");
             e.printStackTrace();
         }
+        return path;
     }
     //method to store the snapshot
-    public void  storeSnapshot(Snapshot snapshot) {
-        try {
-            Path path = Paths.get(folderName);
-            if (!Files.exists(path)) {
-                try {
-                    Files.createFile(path);
-                } catch (FileAlreadyExistsException ignored) {}
-            }
-            try (FileOutputStream out = new FileOutputStream(folderName + File.separator + "snapshot_" + snapshot.getSnapshotId().toString())) {
-                out.write(SerializationUtils.serialize(snapshot));
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-
-            }
-
+    public static void  storeSnapshot(Snapshot snapshot,Path path) {
+        try (FileOutputStream out = new FileOutputStream(path + File.separator + "snapshot_" + snapshot.getSnapshotId().toString())) {
+            out.write(SerializationUtils.serialize(snapshot));
         } catch (IOException e) {
-            System.err.println("Could not create file");
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
+
     }
 
-    //method to retrieve the snapshot
-    public Snapshot retrieveSnapshot(UUID snapshotId) throws IOException, ClassNotFoundException {
-        FileInputStream fileIn = new FileInputStream(folderName + File.separator +"snapshot_" + snapshotId.toString());
+    //method to retrieve the snapshot , null if not found
+    public static Snapshot loadSnapshot(UUID snapshotId, Path path) throws IOException, ClassNotFoundException {
+        File file = new File(path + File.separator +"snapshot_" + snapshotId.toString());
+        if (!file.exists()) {
+            // se il file non esiste, ritorna null
+            return null;
+        }
+
+        FileInputStream fileIn = new FileInputStream(file);
         ObjectInputStream in = new ObjectInputStream(fileIn);
         Snapshot snapshot = (Snapshot) in.readObject();
         return snapshot;
     }
 
-    //method to delete the snapshot
 
-    //method to delete all the snapshots
+    //method to retrieve last saved snapshot name
+    public static UUID getLastSnapshotId(String folderPath) {
+        // crea un oggetto File che rappresenta la cartella
+        File folder = new File(folderPath);
 
-    //method to delete the folder
+        // ottiene la lista dei file nella cartella
+        File[] files = folder.listFiles();
+
+        // se la cartella è vuota, restituisci null
+        if (files == null || files.length == 0) {
+            return DistributedSnapshot.getUuidNull();
+        }
+
+        // ordina la lista di file in ordine cronologico (dal più vecchio al più recente)
+        Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
+
+        // ottiene il nome del primo file in ordine cronologico
+        String firstFileName = files[files.length-1].getName();
 
 
+
+
+        return UUID.fromString(firstFileName.substring(9));
+    }
+
+
+
+    // metodo per eliminare tutti gli snapshot salvati nella cartella
+    public static void deleteAllSnapshots(Path folderPath) throws IOException {
+        // crea un oggetto File che rappresenta la cartella
+        File folder = folderPath.toFile();
+
+        // ottiene la lista dei file nella cartella
+        File[] files = folder.listFiles();
+
+        // elimina tutti i file nella cartella
+        if (files != null) {
+            for (File file : files) {
+                if (!file.isDirectory()) {
+                    file.delete();
+                }
+            }
+        }
+    }
+
+    // metodo per eliminare tutti gli snapshot successivi in ordine cronologico ad uno snapshot dato (escluso quello che gli passo)
+    public static void deleteSnapshotsAfter(UUID snapshotId, Path folderPath) throws IOException {
+        // crea un oggetto File che rappresenta la cartella
+        File folder = folderPath.toFile();
+
+        // ottiene la lista dei file nella cartella
+        File[] files = folder.listFiles();
+
+        // se la cartella è vuota, non fa niente
+        if (files == null || files.length == 0) {
+            return;
+        }
+
+        // ordina la lista di file in ordine cronologico (dal più vecchio al più recente)
+        Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
+
+        // elimina tutti i file successivi a quello con lo snapshotId dato (escluso quello con lo snapshotId dato)
+        boolean delete = false;
+        for (File file : files) {
+            if (!file.isDirectory()) {
+                if (delete) {
+                    file.delete();
+                } else if (file.getName().equals("snapshot_" + snapshotId.toString())) {
+                    delete = true;
+                }
+            }
+        }
+    }
 
 
 

@@ -1,75 +1,88 @@
 import SnapshotLibrary.DistributedSnapshot;
-import SnapshotLibrary.Messages.Marker;
+import SnapshotLibrary.MessageListener;
+import SnapshotLibrary.Storage;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
-import java.util.LinkedHashMap;
+import java.util.Random;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import static java.lang.Thread.sleep;
 
-public class SenderMessageTest {
-    public static void main(String[] args) throws IOException, InterruptedException {
-        int port1=24071,port2=24079;
-        DistributedSnapshot ds = new DistributedSnapshot();
-       int port = 24072; //porta d ascolto
-            if (args.length > 0) {
-                if(Integer.parseInt(args[0])==0){
-                    ds.init(port1);
-                    sleep(10000);
-                    port=port2;
-                }
-                else {
-                    sleep(1000);
-                    ds.init(port2);
-                    port = port1;
-                }
+public class SenderMessageTest{
+    public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
+        int serverPort1 = 24071;
+        int serverPort2 = 24079;
+        DistributedSnapshot distrSnap = null;
+        MyState state = new MyState();
+        MessageListener listener = new MyListener(state);
+        UUID lastSnap ;
+
+        Logger.getLogger("SendereMessageTest").info("Starting SenderMessageTest");
+        if (args.length == 0) {
+            Logger.getLogger("SendereMessageTest").info("Please specify a node ID (0 or 1)");
+            System.exit(1);
+        }
+
+        int nodeId = Integer.parseInt(args[0]);
+
+        if (nodeId == 0) {
+             distrSnap = new DistributedSnapshot("Snapshot1", listener, state);
+             listener.setDistributedSnapshot(distrSnap);
+            Logger.getLogger("SenderMessageTest"+nodeId+1).info("Setted listener");
+            while (!distrSnap.init(serverPort1)) {
+                sleep(5000);
+                Logger.getLogger("SenderMessageTest1").info("Port " + serverPort1 + " is occupied, waiting 5 seconds");
             }
-            else{
-                System.out.println("Inserire 0 o 1 come argomento");
+            sleep(5000);
+        } else if (nodeId == 1) {
+            distrSnap = new DistributedSnapshot("Snapshot2", listener, state);
+            listener.setDistributedSnapshot(distrSnap);
+            Logger.getLogger("SenderMessageTest"+nodeId+1).info("Setted listener");
+            while (!distrSnap.init(serverPort2)) {
+                sleep(1000);
+                Logger.getLogger("SenderMessageTest2").info("Port " + serverPort2 + " is occupied, waiting 5 seconds");
             }
+        } else {
+            Logger.getLogger("SenderMessageTest").warning("Invalid node ID (must be 0 or 1)");
+            System.exit(1);
+        }
 
 
         InetAddress ipAddress = InetAddress.getByName("127.0.0.1");
-        //harcodare qui la porta del nodo server 10720
-        String node1 = ds.installNewConnectionToNode(ipAddress, port);
-        System.out.println("Connessione installata");
+        String serverAddress = distrSnap.installNewConnectionToNode(ipAddress, (nodeId == 0) ? serverPort2 : serverPort1);
+        String folderPath= (nodeId == 0 ? "Snapshot1" : "Snapshot2");
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        while (true) {
-                System.out.print("Inserisci l'oggetto da inviare: ");
-                // Qui si assume che l'oggetto sia di tipo String, ma è possibile utilizzare qualsiasi altro tipo di oggetto
-                Object object = reader.readLine();
-                if(object.equals("marker")){
-                    ds.startSnapshot();
-                }
-                else{
-                    ds.sendMessage(node1,object);
-                }
-      }
+        Random rand = new Random();
+        int sum = 0;
+        for (int i = 0; i < 50; i++) {
+            int num = rand.nextInt(101) - 50;
+            distrSnap.sendMessage(serverAddress, num);
+            sum += num;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+            Object input = reader.readLine();
+
+            while (!input.equals("fine")) {
+                if (input.equals("marker"))
+                    distrSnap.startSnapshot();
+                else if (input.equals("restore")) {
+                    lastSnap = Storage.getLastSnapshotId(folderPath);
+                    distrSnap.sendMessage(serverAddress, lastSnap);
+                    distrSnap.restoreSnapshot(lastSnap);
+                }else
+                    distrSnap.sendMessage(serverAddress, input);
+                Logger.getLogger("SendereMessageTest"+nodeId+1).info("Stato attuale: " + state.getState());
+                input = reader.readLine();
+            }
+        }
+
+        distrSnap.end();
+        Logger.getLogger("SendereMessageTest"+nodeId+1).info("Program closed");
     }
+
 }
-//        try {
-//            // Creazione del socket e connessione all'indirizzo IP e alla porta specificati
-//            InetAddress ipAddress = InetAddress.getByName("192.168.121.51");
-//            int port = 43462; //harcodare qui la porta del nodo server
-//            Socket socket = new Socket(ipAddress, port);
-//
-//            // Preparazione dei buffer di input e output
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-//            ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
-//
-//            // Ciclo while infinito per leggere l'oggetto dalla tastiera e inviarlo tramite socket
-//            while (true) {
-//                System.out.print("Inserisci l'oggetto da inviare: ");
-//                // Qui si assume che l'oggetto sia di tipo String, ma è possibile utilizzare qualsiasi altro tipo di oggetto
-//                String object = reader.readLine();
-//                objectOutput.writeObject(object);
-//            }
-//        } catch (IOException e) {
-//            System.out.println("Errore durante la connessione al server: " + e.getMessage());
-//        }
-//    }
-//}

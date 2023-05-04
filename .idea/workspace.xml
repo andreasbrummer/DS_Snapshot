@@ -4,22 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="Uno snapshot funziona">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/prova.txt" afterDir="false" />
+    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="now the NodeHandler waits for a new object for five seconds">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MyListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/MyListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SenderMessageTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SenderMessageTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/SenderMessageTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SenderMessageTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Snapshot.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/SenderMessageTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/SenderMessageTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/main.class" afterDir="false" />
-    </list>
-    <list id="db76312a-c781-498c-9c6b-f9e009619aa3" name="Changes by caser" comment="">
-      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,6 +21,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Tag Library Descriptor" />
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
@@ -36,7 +30,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="Andreas" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -54,18 +48,6 @@
       </UrlAndAccount>
     </option>
   </component>
-  <component name="LineStatusTrackerManager">
-    <file path="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java">
-      <ranges>
-        <range start1="14" end1="14" start2="14" end2="16" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="23" end1="23" start2="25" end2="27" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="30" end1="31" start2="34" end2="35" changelist="db76312a-c781-498c-9c6b-f9e009619aa3" />
-        <range start1="32" end1="33" start2="36" end2="37" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="149" end1="149" start2="153" end2="154" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-        <range start1="188" end1="188" start2="193" end2="195" changelist="b20208bd-06e1-44f6-9d53-78bb3d314151" />
-      </ranges>
-    </file>
-  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -76,50 +58,68 @@
       </MavenGeneralSettings>
     </option>
   </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectId" id="2Mv7TxseNnSRH2Fi9zPz0pHUdhy" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;TODO_SCOPE&quot;: &quot;All Places&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/andreas/Desktop/DS/DS_project/DS_Snapshot&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "TODO_SCOPE": "All Places",
+    "WebServerToolWindowFactoryState": "false",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "last_opened_file_path": "/home/andreas/Desktop/DS/Prova",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "editor.preferences.completion",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/src" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$/src/SnapshotLibrary" />
+      <recent name="$PROJECT_DIR$" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="" />
     </key>
   </component>
   <component name="RunManager" selected="Application.App2">
-    <configuration name="App1" type="Application" factoryName="Application" folderName="New Folder">
+    <configuration name="App1" type="Application" factoryName="Application" singleton="false">
       <option name="MAIN_CLASS_NAME" value="SenderMessageTest" />
       <module name="DS_Snapshot" />
       <option name="PROGRAM_PARAMETERS" value="0" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../Prova" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="App2" type="Application" factoryName="Application" folderName="New Folder">
+    <configuration name="App2" type="Application" factoryName="Application" singleton="false">
+      <option name="MAIN_CLASS_NAME" value="SenderMessageTest" />
+      <module name="DS_Snapshot" />
+      <option name="PROGRAM_PARAMETERS" value="1" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../Prova" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Prova2" type="Application" factoryName="Application" folderName="New Folder">
       <option name="MAIN_CLASS_NAME" value="SenderMessageTest" />
       <module name="DS_Snapshot" />
       <option name="PROGRAM_PARAMETERS" value="1" />
@@ -128,6 +128,7 @@
       </method>
     </configuration>
     <list>
+      <item itemvalue="Application.Prova2" />
       <item itemvalue="Application.App1" />
       <item itemvalue="Application.App2" />
     </list>
@@ -144,6 +145,11 @@
       <workItem from="1678654071753" duration="1690000" />
       <workItem from="1678866415385" duration="466000" />
       <workItem from="1678901562944" duration="8759000" />
+      <workItem from="1679666526397" duration="1155000" />
+      <workItem from="1679668780782" duration="11814000" />
+      <workItem from="1679681867979" duration="49000" />
+      <workItem from="1682607024585" duration="5107000" />
+      <workItem from="1683020446344" duration="12105000" />
     </task>
     <task id="LOCAL-00001" summary="First commit">
       <created>1678636834719</created>
@@ -194,7 +200,49 @@
       <option name="project" value="LOCAL" />
       <updated>1678653689540</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Improved testing, added multisnapshot and improved the code">
+      <created>1678993163641</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1678993163641</updated>
+    </task>
+    <task id="LOCAL-00009" summary="MyListener&#10;MyState &#10;added">
+      <created>1679043804378</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1679043804378</updated>
+    </task>
+    <task id="LOCAL-00010" summary="MyListener&#10;MyState &#10;added">
+      <created>1679680760833</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1679680760833</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Connections problems fixed">
+      <created>1683064955651</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1683064955651</updated>
+    </task>
+    <task id="LOCAL-00012" summary="code refactor in SenderMessageTest">
+      <created>1683107152210</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1683107152210</updated>
+    </task>
+    <task id="LOCAL-00013" summary="now the NodeHandler waits for a new object for five seconds">
+      <created>1683122331147</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1683122331147</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -216,7 +264,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="origin/master" />
+                        <option value="origin/MultiSnapShot-withLISTENER" />
                       </list>
                     </value>
                   </entry>
@@ -236,7 +284,12 @@
     <MESSAGE value="modificato il main" />
     <MESSAGE value="aggiunto startSnapshot" />
     <MESSAGE value="Uno snapshot funziona" />
-    <option name="LAST_COMMIT_MESSAGE" value="Uno snapshot funziona" />
+    <MESSAGE value="Improved testing, added multisnapshot and improved the code" />
+    <MESSAGE value="MyListener&#10;MyState &#10;added" />
+    <MESSAGE value="Connections problems fixed" />
+    <MESSAGE value="code refactor in SenderMessageTest" />
+    <MESSAGE value="now the NodeHandler waits for a new object for five seconds" />
+    <option name="LAST_COMMIT_MESSAGE" value="now the NodeHandler waits for a new object for five seconds" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
