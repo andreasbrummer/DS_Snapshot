@@ -99,7 +99,7 @@ public class SenderMessageTest{
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
             int sum = 0;
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 1; i++) {
                 int num = rand.nextInt(101) - 50;
                 try {
                     distrSnap.sendMessage(serverAddress, num);

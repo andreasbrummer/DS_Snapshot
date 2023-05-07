@@ -52,7 +52,7 @@ public class DistributedSnapshot{
     private final List<SocketAddress> inputNodes = new ArrayList<>();
     private final Map<UUID,Snapshot> snapshots = new HashMap<>();
     private final Map<UUID,Socket> outputNodes = new HashMap<>();
-    private final List<NodeConnection> nodeConnections = new ArrayList<>();
+    //private final List<NodeConnection> nodeConnections = new ArrayList<>();
 
     private final Map<UUID,ObjectOutputStream> outputStream = new HashMap<>();
     private static final Log LOGGER = LogFactory.getLog(DistributedSnapshot.class);
@@ -63,10 +63,10 @@ public class DistributedSnapshot{
 
     /*  only for testing
         delay (in milliseconds) before a snapshot is started */
-    static final int SNAPSHOT_START_DELAY_MS = 5000;
+    static final int SNAPSHOT_START_DELAY_MS = 2000;
 
     /*  only for testing */
-    static final boolean TEST_MODE = false;
+    static final boolean TEST_MODE = true;
     //TODO capire il discorso delle cartella e dei file (es. se cartella è gia esistente)
     public DistributedSnapshot(Path path) {
         this.path = path;
@@ -434,6 +434,9 @@ public class DistributedSnapshot{
                     while ( !Thread.currentThread().isInterrupted()) {
                             //LOGGER.debug("Waiting for a new message...");
                             try{
+                                if(clientSocket.isClosed()) {
+                                    Thread.currentThread().interrupt();
+                                }
                                 inputObject = in.readObject();
                             }catch (SocketTimeoutException e){
                                 //LOGGER.debug("Timeout");

@@ -4,16 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="SenderMessageTest upgrade">
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="added the possibility to reconnect">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SenderMessageTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SenderMessageTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/Storage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Storage.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Storage.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Storage.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -259,7 +255,14 @@
       <option name="project" value="LOCAL" />
       <updated>1683201616717</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="added the possibility to reconnect">
+      <created>1683217424303</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1683217424303</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -322,7 +325,8 @@
     <MESSAGE value="code refactor in SenderMessageTest" />
     <MESSAGE value="now the NodeHandler waits for a new object for five seconds" />
     <MESSAGE value="SenderMessageTest upgrade" />
-    <option name="LAST_COMMIT_MESSAGE" value="SenderMessageTest upgrade" />
+    <MESSAGE value="added the possibility to reconnect" />
+    <option name="LAST_COMMIT_MESSAGE" value="added the possibility to reconnect" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
