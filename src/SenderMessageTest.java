@@ -24,7 +24,7 @@ public class SenderMessageTest{
     private static final String INPUT_SUM = "sum";
     private static final String INPUT_EXIT = "fine";
     private static final String OPEN_CONNECTION = "open";
-    private static final String REMOTE_IP = "192.168.6.239";
+    private static final String REMOTE_IP = "192.168.6.51";
     private static final String CLOSE_CONNECTION = "close";
 
     private static int serverPort1 = 24071;
@@ -114,20 +114,12 @@ public class SenderMessageTest{
                 }
                 sum += num;
             }
-            //logSum(sum, nodeId);
         });
         executor.shutdown();
-//        new Thread(() -> {
-//            try {
-//                Thread.sleep(rand.nextInt(10000) );
-//                distrSnap.startSnapshot();
-//            } catch (InterruptedException | IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }).start();
     }
     private static void logState(int nodeId, MyState state) {
-        Logger.getLogger("SendereMessageTest" + nodeId + 1).info("Stato attuale: " + state.getState());
+        Logger.getLogger("SendereMessageTest" + nodeId + 1).info("Ciao Stato attuale: " + state.getState());
+
     }
     private static void logSum(int sum,int nodeId) {
         Logger.getLogger("SendereMessageTest" + nodeId + 1).info("Somma attuale: " + sum);

@@ -63,7 +63,7 @@ public class DistributedSnapshot{
 
     /*  only for testing
         delay (in milliseconds) before a snapshot is started */
-    static final int SNAPSHOT_START_DELAY_MS = 2000;
+    static final int SNAPSHOT_START_DELAY_MS = 7000;
 
     /*  only for testing */
     static final boolean TEST_MODE = true;
@@ -100,7 +100,7 @@ public class DistributedSnapshot{
         Socket socket = new Socket(ip, port);
         UUID id = UUID.randomUUID();
         for(Socket s : outputNodes.values()){
-            if(s.getInetAddress().equals(ip) && s.getPort() == port){
+            if(s.getInetAddress().equals(ip) /*&& s.getPort() == port*/){
                 LOGGER.error("Connection already exists with: " + ip + " port: " + port);
                 return null;
             }
@@ -116,7 +116,7 @@ public class DistributedSnapshot{
         Socket socket = new Socket(ip, port);
         UUID id = UUID.fromString(nodeId);
         for(Socket s : outputNodes.values()){
-            if(s.getInetAddress().equals(ip) && s.getPort() == port){
+            if(s.getInetAddress().equals(ip) /*&& s.getPort() == port*/){
                 LOGGER.error("Connection already exists with: " + ip + " port: " + port);
                 return;
             }
@@ -182,7 +182,16 @@ public class DistributedSnapshot{
             if (e instanceof java.io.EOFException || e instanceof java.net.SocketException) {
                 // Handle the case where the server closed the connection remotely
                 //outputNodes.remove(UUID.fromString(node_id));
-                LOGGER.error("Server closed the connection remotely.");
+                LOGGER.error("Server closed the connection remotely.Reconnecting...");
+
+                InetAddress IP = outputNodes.get(UUID.fromString(node_id)).getInetAddress();
+                int port = outputNodes.get(UUID.fromString(node_id)).getPort();
+                Socket socket = new Socket(IP, port);
+                ObjectOutputStream objectOutput2 = new ObjectOutputStream(socket.getOutputStream());
+                outputNodes.remove(UUID.fromString(node_id));
+                outputStream.remove(UUID.fromString(node_id));
+                outputNodes.put(UUID.fromString(node_id), socket);
+                outputStream.put(UUID.fromString(node_id), objectOutput2);
             } else {
                 // Handle other IOExceptions
                 LOGGER.error("Error sending message to " + node_id, e);
