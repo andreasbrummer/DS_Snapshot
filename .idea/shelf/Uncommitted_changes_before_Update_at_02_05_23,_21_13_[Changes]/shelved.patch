@@ -1,0 +1,952 @@
+Index: src/SnapshotLibrary/DistributedSnapshot.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package SnapshotLibrary;\n\nimport SnapshotLibrary.Messages.Marker;\n\nimport java.io.IOException;\nimport java.io.ObjectInputStream;\nimport java.io.ObjectOutputStream;\nimport java.io.Serializable;\nimport java.net.InetAddress;\nimport java.net.ServerSocket;\nimport java.net.Socket;\nimport java.net.SocketAddress;\nimport java.nio.file.Path;\nimport java.util.*;\nimport java.util.concurrent.Executors;\nimport java.util.concurrent.ScheduledExecutorService;\nimport java.util.concurrent.TimeUnit;\n\nimport org.apache.commons.lang3.tuple.Pair;\nimport org.apache.commons.logging.Log;\nimport org.apache.commons.logging.LogFactory;\n\n\n\n\n\n/*\n    * @author: Andreas Brummer\n    * @author: Francesco Caserta\n    * @date: 2023-03-16\n    * @version: 1.0\n    * @description: DistributedSnapshot class\n    * @note: This class is used to create a distributed snapshot of a distributed system.\n    * @note: The class is used to create a snapshot of the distributed system, and to store it in a file.\n    * @note: The class is also used to retrieve a snapshot from a file.\n    * @note: The class is also used to delete a snapshot from a file.\n    * @param: serverPortNumber: port number for the server\n    * @param: status: current status of the distributed system\n    * @param: server: server object\n    * @param: path: path to the directory where snapshots will be stored\n    * @param: input_nodes: list of SocketAddress of input nodes\n    * @param: snapshots: map of all snapshots currently in progress\n    * @param: output_nodes: map of all output nodes, using UUID as key and Socket object as value\n    * @param: output_stream: map of all output streams, using UUID as key and ObjectOutputStream object as value\n    * @param: SNAPSHOT_START_DELAY_MS: only for testing\n    * */\n\npublic class DistributedSnapshot{\n    private MessageListener listener;\n    private State status;\n    private Server server;\n    private final Path path;\n    private final List<SocketAddress> inputNodes = new ArrayList<>();\n    private final Map<UUID,Snapshot> snapshots = new HashMap<>();\n    private final Map<UUID,Socket> outputNodes = new HashMap<>();\n    private final Map<UUID,ObjectOutputStream> outputStream = new HashMap<>();\n    private static final Log LOGGER = LogFactory.getLog(DistributedSnapshot.class);\n\n    private final Object messageLock = new Object();\n\n\n    /*  only for testing\n        delay (in milliseconds) before a snapshot is started */\n    static final int SNAPSHOT_START_DELAY_MS = 5000;\n\n    /*  only for testing */\n    static final boolean TEST_MODE = true;\n    //TODO capire il discorso delle cartella e dei file (es. se cartella è gia esistente)\n    public DistributedSnapshot(Path path) {\n        this.path = path;\n    }\n    public DistributedSnapshot(String folderName, MessageListener listener, State status) {\n        this.path = Storage.createFolder(folderName);\n        this.listener = listener;\n        this.status = status;\n    }\n    public DistributedSnapshot() {\n        this.path = Storage.createFolder(\"Snapshots\");\n    }\n    //TODO: pensare se mettere come argomento del costruttore anche lo status\n\n\n    public boolean init(int serverPortNumber) {\n            server = new Server();\n            server.start(serverPortNumber);\n            LOGGER.info(\"Server started.\");\n            return true;\n    }\n\n\n    public void end() throws IOException { // close server\n        server.stop();\n        LOGGER.info(\"Server stopped.\");\n    }\n\n    public String installNewConnectionToNode(InetAddress ip, int port) throws IOException {\n        Socket socket = new Socket(ip, port);\n        UUID id = UUID.randomUUID();\n        outputNodes.put(id, socket);\n        ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());\n        outputStream.put(id, objectOutput);\n        return id.toString();\n    }\n\n    public void sendMessage(String node_id, Object msg) throws IOException {\n        outputStream.get(UUID.fromString(node_id)).writeObject(msg);\n    }\n\n    public UUID startSnapshot() throws IOException {\n        UUID snapshotId = UUID.randomUUID();\n        Marker marker = new Marker(snapshotId);\n        State stateToStore = status.copy(); // Copia lo stato di status in stateToStore (altrimenti finche non faccio lo store, se ricevo i messaggi viene modificato)\n        snapshots.put(marker.getSnapshotId(), new Snapshot(marker.getSnapshotId(), stateToStore ,new ArrayList<>(inputNodes)));\n        //LOGGER.info(\"Starting snapshot \" + input_nodes); //only for test\n\n        // send marker to all nodes\n        for (ObjectOutputStream objectOutput : outputStream.values()) {\n            objectOutput.writeObject(marker);\n        }\n        return snapshotId;\n    }\n\n    public void endSnapshot(Snapshot snapshot)  {\n        LOGGER.info(\"Snapshot \" + snapshot.getSnapshotId() + \" ended.\");\n        Storage.storeSnapshot(snapshot, path);\n        snapshots.remove(snapshot.getSnapshotId());\n        // test\n        if(TEST_MODE) {\n            LOGGER.debug(\"Printing snapshot... \" );\n            LOGGER.debug(snapshot.toString());\n        }\n\n\n    }\n\n    public void restoreSnapshot(UUID snapshotId) throws IOException, ClassNotFoundException, InterruptedException {\n        Snapshot snapshot = Storage.loadSnapshot(snapshotId, path);\n        if(snapshot != null) {\n            LOGGER.info(\"Restoring snapshot \" + snapshotId + \" ...\");\n            State new_state = snapshot.getStatus();\n            status.setState(new_state);\n            LOGGER.info(\"Restoring: State of the saved snapshot: \" + status.getState());\n            List<Pair<SocketAddress,Object>> nodeMessages = snapshot.getNodeMessages();\n            while(!snapshot.getNodeMessages().isEmpty()) {\n                Pair<SocketAddress, Object> pair = nodeMessages.remove(0);\n                listener.onMessageReceived(pair.getRight());\n            }\n            LOGGER.info(\"Restoring: State after the incoming messages in the snapshot: \" + status.getState());\n        }\n    }\n\n\n\n\n\n\n\n\n    private class Server {\n        private ServerSocket serverSocket;\n        private Thread serverThread;\n        private boolean running;\n\n        //controllare se public giusto\n        public void start(int portNumber) { //passare 0 per trovarne una libera\n            try {\n                serverSocket = new ServerSocket(portNumber);\n                int port = serverSocket.getLocalPort();\n                LOGGER.info(\"Server started on port\" + port);\n                running = true;\n                serverThread = new Thread(() -> {\n                    while (running) {\n                        try {\n                            Socket socket = serverSocket.accept();\n                            inputNodes.add(socket.getRemoteSocketAddress());\n                            // Gestisci la connessione del client qui:\n                            LOGGER.info(\"New connection established with:\" + socket.getInetAddress() + \" port:\" + socket.getPort());\n                            new Thread(new NodeHandler(socket)).start();\n\n                        } catch (IOException e) {\n                            e.printStackTrace();\n                        }\n                    }\n                });\n                serverThread.start();\n            } catch (IOException e) {\n                e.printStackTrace();\n            }\n        }\n\n        public void stop() throws IOException {\n            try {\n                running = false;\n                serverSocket.close();\n                serverThread.join();\n                LOGGER.info(\"Server stopped.\");\n            } catch (IOException e) {\n                if(!serverSocket.isClosed())\n                    serverSocket.close();\n                LOGGER.error(\"Error closing server socket\", e);\n            } catch (InterruptedException e) {\n                LOGGER.error(\"Interrupted while waiting for server thread to join\", e);\n                // Restore interrupted status\n                Thread.currentThread().interrupt();\n            }\n        }\n\n    }\n\n\n\n\n\n    private class NodeHandler implements Runnable {\n        private final Socket clientSocket;\n        public NodeHandler(Socket socket) {\n            this.clientSocket = socket;\n        }\n\n\n        /* @description: handleMarker method\n         * @note: This method is used to handle a marker message.\n         */\n\n        private void handleMarker(Marker marker) throws IOException, InterruptedException {\n            UUID snapshotId = marker.getSnapshotId();\n            Snapshot snapshot;\n\n            if (snapshots.containsKey(snapshotId)) {\n                // Case: snapshot in progress\n                snapshot = snapshots.get(snapshotId);\n            } else {\n                // Case: starting snapshot\n                LOGGER.info(\"Starting snapshot \" + snapshotId);\n                State stateToStore = status.copy(); // Copia lo stato di status in stateToStore (altrimenti finche non faccio lo store, se ricevo i messaggi viene modificato)\n                snapshot = new Snapshot(snapshotId, stateToStore, new ArrayList<>(inputNodes));\n\n                snapshots.put(snapshotId, snapshot);\n\n                // Forward marker to all other nodes in the network\n                if (TEST_MODE) {\n                    // Wait before starting the snapshot\n                    ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();\n                    executor.schedule(() -> {\n                        // Forward marker to all other nodes in the network\n                        outputNodes.forEach((k, v) -> {\n                            try {\n                                outputStream.get(k).writeObject(marker);\n                            } catch (IOException e) {\n                                e.printStackTrace();\n                            }\n                        });\n                    }, SNAPSHOT_START_DELAY_MS, TimeUnit.MILLISECONDS);\n                }\n                else {\n                    outputNodes.forEach((k, v) -> {\n                        try {\n                            outputStream.get(k).writeObject(marker);\n                        } catch (IOException e) {\n                            e.printStackTrace();\n                        }\n                    });\n                }\n            }\n            // If it was the last marker, end the snapshot\n            if (snapshot.removeFromNodeAddressList(clientSocket.getRemoteSocketAddress()))\n                endSnapshot(snapshot);\n        }\n\n\n\n\n        /* @description: handleMessage method\n         * @note: This method is used to handle a message.\n         */\n        private void handleMessage(Object message) {\n            if (snapshots.isEmpty()) {\n                // No snapshot in progress: do not save received messages\n                LOGGER.debug(\"Not saving received messages\");\n            } else {\n                // Snapshot in progress: save received messages\n                for (Snapshot snapshot : snapshots.values()) {\n                    LOGGER.debug(\"Saving received messages: \"+ message);\n                    //LOGGER.debug(snapshot.getConnectedNodes()); //only to test\n                    if (snapshot.getConnectedNodes().contains(clientSocket.getRemoteSocketAddress())) {\n                        snapshot.addNodeMessage(clientSocket.getRemoteSocketAddress(), message);\n                        LOGGER.debug(snapshot.getConnectedNodes().toString() + clientSocket.toString()+ message);\n                    }\n                }\n            }\n        }\n\n        @Override\n        public void run() {\n            try {\n                ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());\n                //ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());\n                Object inputObject;\n                while ((inputObject = in.readObject()) != null) {\n                    synchronized(messageLock) {\n                        //listener.onMessageReceived(inputObject);\n                        /*Controllo se ho ricevuto un marker*/\n                        if (inputObject instanceof Marker) {\n                            LOGGER.debug(\"Received a new marker:\\n Id: \" + ((Marker) inputObject).getSnapshotId());\n                            handleMarker((Marker) inputObject);\n                        } else {\n                            LOGGER.debug(\"Received a new message: \" + inputObject);\n                            handleMessage(inputObject); //Perche lo avevi tolto?\n\n                            //testato che aspetta che la chiamata termini prima di andare avanti\n                            //in realta aspetta anche se non è synchronize\n                            listener.onMessageReceived(inputObject);\n                            //LOGGER.debug(\"Eccomi sono fuori\"); //for test\n                        }\n                    }\n                }\n            } catch (IOException e) {\n                if (clientSocket.isClosed()) {\n                    // Socket closed by remote host\n                    LOGGER.error(\"Socket chiuso dal lato remoto.\");\n\n                    //TODO: togliere da input_nodes e chiudere questo thread.\n                } else {\n                    // Other I/O errors\n                    e.printStackTrace();\n                }\n            } catch (ClassNotFoundException e) {\n                e.printStackTrace();\n            }catch (InterruptedException e) {\n                throw new RuntimeException(e);\n            } finally {\n                // Socket closing\n                try {\n                    clientSocket.close(); //IN TEORIA NON DOBBIAMO CHIUDERE NOI IL SOCKET DEL CLIENT. DEVE CHIUDERLO IL CLIENT\n                } catch (IOException e) {\n                    throw new RuntimeException(e);\n                }\n            }\n            }\n        }\n    }\n\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/SnapshotLibrary/DistributedSnapshot.java b/src/SnapshotLibrary/DistributedSnapshot.java
+--- a/src/SnapshotLibrary/DistributedSnapshot.java	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ b/src/SnapshotLibrary/DistributedSnapshot.java	(date 1683054498196)
+@@ -2,19 +2,17 @@
+ 
+ import SnapshotLibrary.Messages.Marker;
+ 
+-import java.io.IOException;
+-import java.io.ObjectInputStream;
+-import java.io.ObjectOutputStream;
+-import java.io.Serializable;
+-import java.net.InetAddress;
+-import java.net.ServerSocket;
+-import java.net.Socket;
+-import java.net.SocketAddress;
++import java.io.*;
++import java.net.*;
+ import java.nio.file.Path;
+ import java.util.*;
+ import java.util.concurrent.Executors;
+ import java.util.concurrent.ScheduledExecutorService;
+ import java.util.concurrent.TimeUnit;
++import java.util.concurrent.ExecutorService;
++import java.util.concurrent.atomic.AtomicBoolean;
++
++
+ 
+ import org.apache.commons.lang3.tuple.Pair;
+ import org.apache.commons.logging.Log;
+@@ -80,20 +78,21 @@
+     //TODO: pensare se mettere come argomento del costruttore anche lo status
+ 
+ 
+-    public boolean init(int serverPortNumber) {
++    public boolean init(int serverPortNumber) throws IOException {
+             server = new Server();
+             server.start(serverPortNumber);
+             LOGGER.info("Server started.");
+             return true;
+     }
+ 
+-
+-    public void end() throws IOException { // close server
+-        server.stop();
+-        LOGGER.info("Server stopped.");
+-    }
++    // close server
++        public void end() throws IOException {
++            server.stop();
++            LOGGER.info("Server stopped.");
++            closeAllConnections();
++        }
+ 
+-    public String installNewConnectionToNode(InetAddress ip, int port) throws IOException {
++    public synchronized String installNewConnectionToNode(InetAddress ip, int port) throws IOException {
+         Socket socket = new Socket(ip, port);
+         UUID id = UUID.randomUUID();
+         outputNodes.put(id, socket);
+@@ -101,6 +100,38 @@
+         outputStream.put(id, objectOutput);
+         return id.toString();
+     }
++    private void closeAllConnections() {
++        ExecutorService executor = Executors.newFixedThreadPool(outputNodes.size());
++
++        for (UUID id : outputNodes.keySet()) {
++            executor.execute(() -> {
++                try {
++                    Socket socket = outputNodes.get(id);
++                    ObjectOutputStream objectOutput = outputStream.get(id);
++
++                    objectOutput.close();
++                    socket.close();
++                    outputNodes.remove(id);
++                    outputStream.remove(id);
++
++                    LOGGER.info("Connection closed with: " + socket.getInetAddress() + " port: " + socket.getPort());
++                } catch (IOException e) {
++                    LOGGER.error("Error closing connection with id: " + id, e);
++                }
++            });
++        }
++
++        executor.shutdown();
++        try {
++            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
++            LOGGER.info("All connections closed.");
++        } catch (InterruptedException e) {
++            LOGGER.error("Interrupted while waiting for connection closing threads to finish", e);
++            // Restore interrupted status
++            Thread.currentThread().interrupt();
++        }
++    }
++
+ 
+     public void sendMessage(String node_id, Object msg) throws IOException {
+         outputStream.get(UUID.fromString(node_id)).writeObject(msg);
+@@ -155,57 +186,70 @@
+ 
+ 
+ 
+-
+-    private class Server {
+-        private ServerSocket serverSocket;
+-        private Thread serverThread;
+-        private boolean running;
+-
+-        //controllare se public giusto
+-        public void start(int portNumber) { //passare 0 per trovarne una libera
+-            try {
+-                serverSocket = new ServerSocket(portNumber);
+-                int port = serverSocket.getLocalPort();
+-                LOGGER.info("Server started on port" + port);
+-                running = true;
+-                serverThread = new Thread(() -> {
+-                    while (running) {
+-                        try {
+-                            Socket socket = serverSocket.accept();
+-                            inputNodes.add(socket.getRemoteSocketAddress());
+-                            // Gestisci la connessione del client qui:
+-                            LOGGER.info("New connection established with:" + socket.getInetAddress() + " port:" + socket.getPort());
+-                            new Thread(new NodeHandler(socket)).start();
+-
+-                        } catch (IOException e) {
+-                            e.printStackTrace();
+-                        }
+-                    }
+-                });
+-                serverThread.start();
+-            } catch (IOException e) {
+-                e.printStackTrace();
+-            }
+-        }
++ private class Server {
++     private ServerSocket serverSocket;
++     private Thread serverThread;
++     private AtomicBoolean running = new AtomicBoolean(false);
++     List<Thread> nodeHandlerThreads = new ArrayList<>();
++     public void start(int portNumber) throws IOException {
++         if (running.get()) {
++             LOGGER.warn("Server is already running.");
++             return;
++         }
++         serverSocket = new ServerSocket(portNumber);
++         int port = serverSocket.getLocalPort();
++         LOGGER.info("Server started on port " + port);
++         running.set(true);
++         serverThread = new Thread(() -> {
++             while (running.get()) {
++                 try {
++                     Socket socket = serverSocket.accept();
++                     inputNodes.add(socket.getRemoteSocketAddress());
++                     LOGGER.info("New connection established with: " + socket.getInetAddress() + " port:" + socket.getPort());
++                     Thread nodeHandlerThread = new Thread(new NodeHandler(socket), "NodeHandler"+Thread.activeCount());
++                     nodeHandlerThreads.add(nodeHandlerThread);
++                     nodeHandlerThread.start();
++                 } catch (SocketException e) {
++                     if (running.get()) {
++                         LOGGER.error("Error accepting client connection.", e);
++                     }
++                 } catch (IOException e) {
++                     LOGGER.error("Error accepting client connection.", e);
++                 }
++             }
++         });
++         serverThread.start();
++     }
+ 
+-        public void stop() throws IOException {
+-            try {
+-                running = false;
+-                serverSocket.close();
+-                serverThread.join();
+-                LOGGER.info("Server stopped.");
+-            } catch (IOException e) {
+-                if(!serverSocket.isClosed())
+-                    serverSocket.close();
+-                LOGGER.error("Error closing server socket", e);
+-            } catch (InterruptedException e) {
+-                LOGGER.error("Interrupted while waiting for server thread to join", e);
+-                // Restore interrupted status
+-                Thread.currentThread().interrupt();
+-            }
+-        }
++     public void stop() {
++         if (!running.get()) {
++             LOGGER.warn("Server is not running.");
++             return;
++         }
++         running.set(false);
++         try {
++             serverSocket.close();
++             serverThread.interrupt();
++             for (Thread nodeHandlerThread : nodeHandlerThreads) {
++                 nodeHandlerThread.interrupt();
++                 nodeHandlerThread.join();
++             }
++             serverThread.join();
++             LOGGER.info("Server stopped.");
++         } catch (IOException | InterruptedException e) {
++             LOGGER.error("Error stopping server.", e);
++         }
++
++     }
++
++     public boolean isRunning() {
++         return running.get();
++     }
+ 
+-    }
++     public int getPort() {
++         return serverSocket.getLocalPort();
++     }
++ }
+ 
+ 
+ 
+@@ -296,34 +340,39 @@
+                 ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
+                 //ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
+                 Object inputObject;
+-                while ((inputObject = in.readObject()) != null) {
+-                    synchronized(messageLock) {
+-                        //listener.onMessageReceived(inputObject);
+-                        /*Controllo se ho ricevuto un marker*/
+-                        if (inputObject instanceof Marker) {
+-                            LOGGER.debug("Received a new marker:\n Id: " + ((Marker) inputObject).getSnapshotId());
+-                            handleMarker((Marker) inputObject);
+-                        } else {
+-                            LOGGER.debug("Received a new message: " + inputObject);
+-                            handleMessage(inputObject); //Perche lo avevi tolto?
++                    while ((inputObject = in.readObject()) != null && !Thread.currentThread().isInterrupted()) {
++                        synchronized(messageLock) {
++                            //listener.onMessageReceived(inputObject);
++                            /*Controllo se ho ricevuto un marker*/
++                            if (inputObject instanceof Marker) {
++                                LOGGER.debug("Received a new marker:\n Id: " + ((Marker) inputObject).getSnapshotId());
++                                handleMarker((Marker) inputObject);
++                            } else {
++                                LOGGER.debug("Received a new message: " + inputObject);
++                                handleMessage(inputObject); //Perche lo avevi tolto?
+ 
+-                            //testato che aspetta che la chiamata termini prima di andare avanti
+-                            //in realta aspetta anche se non è synchronize
+-                            listener.onMessageReceived(inputObject);
+-                            //LOGGER.debug("Eccomi sono fuori"); //for test
++                                //testato che aspetta che la chiamata termini prima di andare avanti
++                                //in realta aspetta anche se non è synchronize
++                                listener.onMessageReceived(inputObject);
++                                //LOGGER.debug("Eccomi sono fuori"); //for test
++                            }
+                         }
+                     }
++            } catch (EOFException e) {
++                // Client closed connection
++                LOGGER.info("Client closed connection: " + clientSocket.getRemoteSocketAddress());
++                // Remove client from input nodes
++                inputNodes.remove(clientSocket.getRemoteSocketAddress());
++                // Close socket
++                try {
++                    clientSocket.close();
++                } catch (IOException ex) {
++                    throw new RuntimeException(ex);
+                 }
+-            } catch (IOException e) {
+-                if (clientSocket.isClosed()) {
+-                    // Socket closed by remote host
+-                    LOGGER.error("Socket chiuso dal lato remoto.");
+-
+-                    //TODO: togliere da input_nodes e chiudere questo thread.
+-                } else {
+-                    // Other I/O errors
+-                    e.printStackTrace();
+-                }
++            }
++            catch (IOException e) {
++                // Other I/O errors
++                e.printStackTrace();
+             } catch (ClassNotFoundException e) {
+                 e.printStackTrace();
+             }catch (InterruptedException e) {
+Index: src/SenderMessageTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import SnapshotLibrary.DistributedSnapshot;\nimport SnapshotLibrary.MessageListener;\nimport SnapshotLibrary.Storage;\n\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.InputStreamReader;\nimport java.net.InetAddress;\nimport java.util.UUID;\nimport java.util.logging.Logger;\n\nimport static java.lang.Thread.sleep;\n\npublic class SenderMessageTest{\n    public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {\n        int serverPort1 = 24071;\n        int serverPort2 = 24079;\n        DistributedSnapshot distr_snap = null;\n        MyState state = new MyState();\n        MessageListener listener = new MyListener(state);\n        System.out.println(\"Starting SenderMessageTest\");\n        if (args.length == 0) {\n            System.err.println(\"Please specify a node ID (0 or 1)\");\n            System.exit(1);\n        }\n\n        int nodeId = Integer.parseInt(args[0]);\n        if (nodeId == 0) {\n             distr_snap = new DistributedSnapshot(\"Snapshot1\", listener, state);\n            while (!distr_snap.init(serverPort1)) {\n                sleep(5000);\n                Logger.getLogger(\"SenderMessageTest\").info(\"Port \" + serverPort1 + \" is occupied, waiting 5 seconds\");\n            }\n            sleep(5000);\n        } else if (nodeId == 1) {\n            distr_snap = new DistributedSnapshot(\"Snapshot2\", listener, state);\n            while (!distr_snap.init(serverPort2)) {\n                sleep(1000);\n                Logger.getLogger(\"SenderMessageTest\").info(\"Port \" + serverPort2 + \" is occupied, waiting 5 seconds\");\n            }\n        } else {\n            System.err.println(\"Invalid node ID (must be 0 or 1)\");\n            System.exit(1);\n        }\n\n\n        InetAddress ipAddress = InetAddress.getByName(\"127.0.0.1\");\n        String serverAddress = distr_snap.installNewConnectionToNode(ipAddress, (nodeId == 0) ? serverPort2 : serverPort1);\n\n\n\n        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {\n            Object input = reader.readLine();\n\n            UUID snapshotId = null;\n            while (!input.equals(\"fine\")) {\n                if (input.equals(\"marker\")) {\n                    distr_snap.startSnapshot();\n                } else if (input.equals(\"restore\")) {\n                    UUID lastSnap;\n                    if (nodeId==0){\n                        lastSnap = UUID.fromString(Storage.retrieveLastSnapshot(\"Snapshot1\").substring(9));\n                    }else {\n                        lastSnap = UUID.fromString(Storage.retrieveLastSnapshot(\"Snapshot2\").substring(9));\n                    }\n                    distr_snap.restoreSnapshot(lastSnap);\n                }else {\n                    distr_snap.sendMessage(serverAddress, input);\n                }\n                System.out.println(\"APP: Stato attuale: \" + state.getState());\n                input = reader.readLine();\n            }\n        }\n\n\n\n        System.out.println(\"Program closed\");\n        distr_snap.end();\n    }\n\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/SenderMessageTest.java b/src/SenderMessageTest.java
+--- a/src/SenderMessageTest.java	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ b/src/SenderMessageTest.java	(date 1683028532476)
+@@ -1,10 +1,11 @@
+ import SnapshotLibrary.DistributedSnapshot;
+ import SnapshotLibrary.MessageListener;
+-import SnapshotLibrary.Storage;
++import SnapshotLibrary.State;
+ 
+ import java.io.BufferedReader;
+ import java.io.IOException;
+ import java.io.InputStreamReader;
++import java.io.Serializable;
+ import java.net.InetAddress;
+ import java.util.UUID;
+ import java.util.logging.Logger;
+@@ -15,7 +16,7 @@
+     public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
+         int serverPort1 = 24071;
+         int serverPort2 = 24079;
+-        DistributedSnapshot distr_snap = null;
++        DistributedSnapshot system = new DistributedSnapshot();
+         MyState state = new MyState();
+         MessageListener listener = new MyListener(state);
+         System.out.println("Starting SenderMessageTest");
+@@ -26,15 +27,15 @@
+ 
+         int nodeId = Integer.parseInt(args[0]);
+         if (nodeId == 0) {
+-             distr_snap = new DistributedSnapshot("Snapshot1", listener, state);
+-            while (!distr_snap.init(serverPort1)) {
++             system = new DistributedSnapshot("Snapshot1", listener, state);
++            while (!system.init(serverPort1)) {
+                 sleep(5000);
+                 Logger.getLogger("SenderMessageTest").info("Port " + serverPort1 + " is occupied, waiting 5 seconds");
+             }
+             sleep(5000);
+         } else if (nodeId == 1) {
+-            distr_snap = new DistributedSnapshot("Snapshot2", listener, state);
+-            while (!distr_snap.init(serverPort2)) {
++            system = new DistributedSnapshot("Snapshot2", listener, state);
++            while (!system.init(serverPort2)) {
+                 sleep(1000);
+                 Logger.getLogger("SenderMessageTest").info("Port " + serverPort2 + " is occupied, waiting 5 seconds");
+             }
+@@ -45,37 +46,43 @@
+ 
+ 
+         InetAddress ipAddress = InetAddress.getByName("127.0.0.1");
+-        String serverAddress = distr_snap.installNewConnectionToNode(ipAddress, (nodeId == 0) ? serverPort2 : serverPort1);
++        String serverAddress = system.installNewConnectionToNode(ipAddress, (nodeId == 0) ? serverPort2 : serverPort1);
+ 
+ 
+ 
+         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+             Object input = reader.readLine();
+-
+-            UUID snapshotId = null;
+-            while (!input.equals("fine")) {
++            UUID snapshotId = null; //last snapshot taken
++            while (true) {
++                if (input.equals("fine")) {
++                    break;
++                }
+                 if (input.equals("marker")) {
+-                    distr_snap.startSnapshot();
++                    snapshotId = system.startSnapshot();
+                 } else if (input.equals("restore")) {
+-                    UUID lastSnap;
+-                    if (nodeId==0){
+-                        lastSnap = UUID.fromString(Storage.retrieveLastSnapshot("Snapshot1").substring(9));
+-                    }else {
+-                        lastSnap = UUID.fromString(Storage.retrieveLastSnapshot("Snapshot2").substring(9));
+-                    }
+-                    distr_snap.restoreSnapshot(lastSnap);
+-                }else {
+-                    distr_snap.sendMessage(serverAddress, input);
++                    if (snapshotId == null) {
++                        System.err.println("No snapshot taken yet");
++                        continue;
++                    }
++                    system.restoreSnapshot(snapshotId);
++                    input = snapshotId;
++
++                } else {
++                    system.sendMessage(serverAddress, input);
+                 }
+-                System.out.println("APP: Stato attuale: " + state.getState());
+                 input = reader.readLine();
+             }
+         }
+ 
+-
+-
+         System.out.println("Program closed");
+-        distr_snap.end();
++        system.end();
++        Thread[] threads = Thread.getAllStackTraces().keySet().toArray(new Thread[0]);
++        System.out.println("Number of running threads: " + threads.length);
++        for (Thread t : threads) {
++            System.out.println(t.getName());
++        }
++
++        System.exit(0);
+     }
+ 
+ }
+Index: .idea/modules.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/modules.xml b/.idea/modules.xml
+deleted file mode 100644
+--- a/.idea/modules.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,8 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project version="4">
+-  <component name="ProjectModuleManager">
+-    <modules>
+-      <module fileurl="file://$PROJECT_DIR$/DS_Snapshot.iml" filepath="$PROJECT_DIR$/DS_Snapshot.iml" />
+-    </modules>
+-  </component>
+-</project>
+\ No newline at end of file
+Index: .idea/libraries/Maven__org_apiguardian_apiguardian_api_1_1_2.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__org_apiguardian_apiguardian_api_1_1_2.xml b/.idea/libraries/Maven__org_apiguardian_apiguardian_api_1_1_2.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__org_apiguardian_apiguardian_api_1_1_2.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: org.apiguardian:apiguardian-api:1.1.2">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/libraries/Maven__org_glassfish_jersey_core_jersey_common_2_34.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__org_glassfish_jersey_core_jersey_common_2_34.xml b/.idea/libraries/Maven__org_glassfish_jersey_core_jersey_common_2_34.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__org_glassfish_jersey_core_jersey_common_2_34.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: org.glassfish.jersey.core:jersey-common:2.34">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/jersey/core/jersey-common/2.34/jersey-common-2.34.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/jersey/core/jersey-common/2.34/jersey-common-2.34-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/jersey/core/jersey-common/2.34/jersey-common-2.34-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/libraries/Maven__org_slf4j_slf4j_api_1_7_33.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__org_slf4j_slf4j_api_1_7_33.xml b/.idea/libraries/Maven__org_slf4j_slf4j_api_1_7_33.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__org_slf4j_slf4j_api_1_7_33.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: org.slf4j:slf4j-api:1.7.33">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.33/slf4j-api-1.7.33.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.33/slf4j-api-1.7.33-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.33/slf4j-api-1.7.33-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/libraries/Maven__commons_logging_commons_logging_1_1_3.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__commons_logging_commons_logging_1_1_3.xml b/.idea/libraries/Maven__commons_logging_commons_logging_1_1_3.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__commons_logging_commons_logging_1_1_3.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: commons-logging:commons-logging:1.1.3">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/commons-logging/commons-logging/1.1.3/commons-logging-1.1.3.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/commons-logging/commons-logging/1.1.3/commons-logging-1.1.3-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/commons-logging/commons-logging/1.1.3/commons-logging-1.1.3-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/libraries/Maven__org_junit_platform_junit_platform_commons_1_9_0_M1.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__org_junit_platform_junit_platform_commons_1_9_0_M1.xml b/.idea/libraries/Maven__org_junit_platform_junit_platform_commons_1_9_0_M1.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__org_junit_platform_junit_platform_commons_1_9_0_M1.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: org.junit.platform:junit-platform-commons:1.9.0-M1">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/junit/platform/junit-platform-commons/1.9.0-M1/junit-platform-commons-1.9.0-M1.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/junit/platform/junit-platform-commons/1.9.0-M1/junit-platform-commons-1.9.0-M1-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/junit/platform/junit-platform-commons/1.9.0-M1/junit-platform-commons-1.9.0-M1-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/libraries/Maven__org_apache_commons_commons_lang3_3_12_0.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__org_apache_commons_commons_lang3_3_12_0.xml b/.idea/libraries/Maven__org_apache_commons_commons_lang3_3_12_0.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__org_apache_commons_commons_lang3_3_12_0.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: org.apache.commons:commons-lang3:3.12.0">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/libraries/Maven__org_slf4j_slf4j_simple_2_0_0_alpha1.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__org_slf4j_slf4j_simple_2_0_0_alpha1.xml b/.idea/libraries/Maven__org_slf4j_slf4j_simple_2_0_0_alpha1.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__org_slf4j_slf4j_simple_2_0_0_alpha1.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: org.slf4j:slf4j-simple:2.0.0-alpha1">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-simple/2.0.0-alpha1/slf4j-simple-2.0.0-alpha1.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-simple/2.0.0-alpha1/slf4j-simple-2.0.0-alpha1-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-simple/2.0.0-alpha1/slf4j-simple-2.0.0-alpha1-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: DS_Snapshot.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DS_Snapshot.iml b/DS_Snapshot.iml
+deleted file mode 100644
+--- a/DS_Snapshot.iml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,30 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_17">
+-    <output url="file://$MODULE_DIR$/target/classes" />
+-    <output-test url="file://$MODULE_DIR$/target/test-classes" />
+-    <content url="file://$MODULE_DIR$">
+-      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+-      <excludeFolder url="file://$MODULE_DIR$/target" />
+-    </content>
+-    <orderEntry type="inheritedJdk" />
+-    <orderEntry type="sourceFolder" forTests="false" />
+-    <orderEntry type="library" scope="TEST" name="Maven: org.junit.jupiter:junit-jupiter-api:5.9.0-M1" level="project" />
+-    <orderEntry type="library" scope="TEST" name="Maven: org.opentest4j:opentest4j:1.2.0" level="project" />
+-    <orderEntry type="library" scope="TEST" name="Maven: org.junit.platform:junit-platform-commons:1.9.0-M1" level="project" />
+-    <orderEntry type="library" scope="TEST" name="Maven: org.apiguardian:apiguardian-api:1.1.2" level="project" />
+-    <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.12.0" level="project" />
+-    <orderEntry type="library" name="Maven: org.checkerframework:checker-qual:3.5.0" level="project" />
+-    <orderEntry type="library" name="Maven: org.glassfish.jersey.core:jersey-common:2.34" level="project" />
+-    <orderEntry type="library" name="Maven: jakarta.ws.rs:jakarta.ws.rs-api:2.1.6" level="project" />
+-    <orderEntry type="library" name="Maven: jakarta.annotation:jakarta.annotation-api:1.3.5" level="project" />
+-    <orderEntry type="library" name="Maven: org.glassfish.hk2.external:jakarta.inject:2.6.1" level="project" />
+-    <orderEntry type="library" name="Maven: org.glassfish.hk2:osgi-resource-locator:1.0.3" level="project" />
+-    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.33" level="project" />
+-    <orderEntry type="library" name="Maven: org.slf4j:slf4j-simple:2.0.0-alpha1" level="project" />
+-    <orderEntry type="library" name="Maven: org.slf4j:slf4j-log4j12:1.8.0-beta4" level="project" />
+-    <orderEntry type="library" name="Maven: log4j:log4j:1.2.17" level="project" />
+-    <orderEntry type="library" name="Maven: commons-logging:commons-logging:1.1.3" level="project" />
+-    <orderEntry type="library" name="Maven: org.apache.commons:commons-collections4:4.4" level="project" />
+-  </component>
+-</module>
+\ No newline at end of file
+Index: .idea/libraries/Maven__org_apache_commons_commons_collections4_4_4.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__org_apache_commons_commons_collections4_4_4.xml b/.idea/libraries/Maven__org_apache_commons_commons_collections4_4_4.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__org_apache_commons_commons_collections4_4_4.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: org.apache.commons:commons-collections4:4.4">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-collections4/4.4/commons-collections4-4.4.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-collections4/4.4/commons-collections4-4.4-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-collections4/4.4/commons-collections4-4.4-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/libraries/Maven__jakarta_annotation_jakarta_annotation_api_1_3_5.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__jakarta_annotation_jakarta_annotation_api_1_3_5.xml b/.idea/libraries/Maven__jakarta_annotation_jakarta_annotation_api_1_3_5.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__jakarta_annotation_jakarta_annotation_api_1_3_5.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: jakarta.annotation:jakarta.annotation-api:1.3.5">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/jakarta/annotation/jakarta.annotation-api/1.3.5/jakarta.annotation-api-1.3.5.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/jakarta/annotation/jakarta.annotation-api/1.3.5/jakarta.annotation-api-1.3.5-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/jakarta/annotation/jakarta.annotation-api/1.3.5/jakarta.annotation-api-1.3.5-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/libraries/Maven__org_junit_jupiter_junit_jupiter_api_5_9_0_M1.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__org_junit_jupiter_junit_jupiter_api_5_9_0_M1.xml b/.idea/libraries/Maven__org_junit_jupiter_junit_jupiter_api_5_9_0_M1.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__org_junit_jupiter_junit_jupiter_api_5_9_0_M1.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: org.junit.jupiter:junit-jupiter-api:5.9.0-M1">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/junit/jupiter/junit-jupiter-api/5.9.0-M1/junit-jupiter-api-5.9.0-M1.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/junit/jupiter/junit-jupiter-api/5.9.0-M1/junit-jupiter-api-5.9.0-M1-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/junit/jupiter/junit-jupiter-api/5.9.0-M1/junit-jupiter-api-5.9.0-M1-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/libraries/Maven__log4j_log4j_1_2_17.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__log4j_log4j_1_2_17.xml b/.idea/libraries/Maven__log4j_log4j_1_2_17.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__log4j_log4j_1_2_17.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: log4j:log4j:1.2.17">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/log4j/log4j/1.2.17/log4j-1.2.17.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/log4j/log4j/1.2.17/log4j-1.2.17-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/log4j/log4j/1.2.17/log4j-1.2.17-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/libraries/Maven__org_glassfish_hk2_osgi_resource_locator_1_0_3.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__org_glassfish_hk2_osgi_resource_locator_1_0_3.xml b/.idea/libraries/Maven__org_glassfish_hk2_osgi_resource_locator_1_0_3.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__org_glassfish_hk2_osgi_resource_locator_1_0_3.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: org.glassfish.hk2:osgi-resource-locator:1.0.3">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/hk2/osgi-resource-locator/1.0.3/osgi-resource-locator-1.0.3.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/hk2/osgi-resource-locator/1.0.3/osgi-resource-locator-1.0.3-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/hk2/osgi-resource-locator/1.0.3/osgi-resource-locator-1.0.3-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/libraries/Maven__org_slf4j_slf4j_log4j12_1_8_0_beta4.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__org_slf4j_slf4j_log4j12_1_8_0_beta4.xml b/.idea/libraries/Maven__org_slf4j_slf4j_log4j12_1_8_0_beta4.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__org_slf4j_slf4j_log4j12_1_8_0_beta4.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: org.slf4j:slf4j-log4j12:1.8.0-beta4">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-log4j12/1.8.0-beta4/slf4j-log4j12-1.8.0-beta4.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-log4j12/1.8.0-beta4/slf4j-log4j12-1.8.0-beta4-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-log4j12/1.8.0-beta4/slf4j-log4j12-1.8.0-beta4-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/libraries/Maven__org_checkerframework_checker_qual_3_5_0.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__org_checkerframework_checker_qual_3_5_0.xml b/.idea/libraries/Maven__org_checkerframework_checker_qual_3_5_0.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__org_checkerframework_checker_qual_3_5_0.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: org.checkerframework:checker-qual:3.5.0">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/libraries/Maven__jakarta_ws_rs_jakarta_ws_rs_api_2_1_6.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__jakarta_ws_rs_jakarta_ws_rs_api_2_1_6.xml b/.idea/libraries/Maven__jakarta_ws_rs_jakarta_ws_rs_api_2_1_6.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__jakarta_ws_rs_jakarta_ws_rs_api_2_1_6.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: jakarta.ws.rs:jakarta.ws.rs-api:2.1.6">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/jakarta/ws/rs/jakarta.ws.rs-api/2.1.6/jakarta.ws.rs-api-2.1.6.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/jakarta/ws/rs/jakarta.ws.rs-api/2.1.6/jakarta.ws.rs-api-2.1.6-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/jakarta/ws/rs/jakarta.ws.rs-api/2.1.6/jakarta.ws.rs-api-2.1.6-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/libraries/Maven__org_glassfish_hk2_external_jakarta_inject_2_6_1.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__org_glassfish_hk2_external_jakarta_inject_2_6_1.xml b/.idea/libraries/Maven__org_glassfish_hk2_external_jakarta_inject_2_6_1.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__org_glassfish_hk2_external_jakarta_inject_2_6_1.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: org.glassfish.hk2.external:jakarta.inject:2.6.1">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/hk2/external/jakarta.inject/2.6.1/jakarta.inject-2.6.1.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/hk2/external/jakarta.inject/2.6.1/jakarta.inject-2.6.1-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/hk2/external/jakarta.inject/2.6.1/jakarta.inject-2.6.1-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/libraries/Maven__org_opentest4j_opentest4j_1_2_0.xml
+===================================================================
+diff --git a/.idea/libraries/Maven__org_opentest4j_opentest4j_1_2_0.xml b/.idea/libraries/Maven__org_opentest4j_opentest4j_1_2_0.xml
+deleted file mode 100644
+--- a/.idea/libraries/Maven__org_opentest4j_opentest4j_1_2_0.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ /dev/null	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
+@@ -1,13 +0,0 @@
+-<component name="libraryTable">
+-  <library name="Maven: org.opentest4j:opentest4j:1.2.0">
+-    <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar!/" />
+-    </CLASSES>
+-    <JAVADOC>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0-javadoc.jar!/" />
+-    </JAVADOC>
+-    <SOURCES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0-sources.jar!/" />
+-    </SOURCES>
+-  </library>
+-</component>
+\ No newline at end of file
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"MavenProjectsManager\">\n    <option name=\"originalFiles\">\n      <list>\n        <option value=\"$PROJECT_DIR$/pom.xml\" />\n      </list>\n    </option>\n  </component>\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_19\" default=\"true\" project-jdk-name=\"openjdk-19\" project-jdk-type=\"JavaSDK\">\n    <output url=\"file://$PROJECT_DIR$/out\" />\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ b/.idea/misc.xml	(date 1682607206563)
+@@ -1,5 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
++  <component name="ExternalStorageConfigurationManager" enabled="true" />
+   <component name="MavenProjectsManager">
+     <option name="originalFiles">
+       <list>
+Index: .idea/compiler.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"CompilerConfiguration\">\n    <annotationProcessing>\n      <profile name=\"Maven default annotation processors profile\" enabled=\"true\">\n        <sourceOutputDir name=\"target/generated-sources/annotations\" />\n        <sourceTestOutputDir name=\"target/generated-test-sources/test-annotations\" />\n        <outputRelativeToContentRoot value=\"true\" />\n        <module name=\"DS_Snapshot\" />\n      </profile>\n    </annotationProcessing>\n    <bytecodeTargetLevel>\n      <module name=\"DS_Snapshot\" target=\"17\" />\n    </bytecodeTargetLevel>\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/compiler.xml b/.idea/compiler.xml
+--- a/.idea/compiler.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ b/.idea/compiler.xml	(date 1682607211671)
+@@ -9,8 +9,5 @@
+         <module name="DS_Snapshot" />
+       </profile>
+     </annotationProcessing>
+-    <bytecodeTargetLevel>
+-      <module name="DS_Snapshot" target="17" />
+-    </bytecodeTargetLevel>
+   </component>
+ </project>
+\ No newline at end of file
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"AutoImportSettings\">\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\n  </component>\n  <component name=\"ChangeListManager\">\n    <list default=\"true\" id=\"b20208bd-06e1-44f6-9d53-78bb3d314151\" name=\"Changes\" comment=\"MyListener&#10;MyState &#10;added\">\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/MyListener.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/MyListener.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/MyState.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/MyState.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/SenderMessageTest.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/SenderMessageTest.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/SnapshotLibrary/MessageListener.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/SnapshotLibrary/MessageListener.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/SnapshotLibrary/State.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/SnapshotLibrary/State.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/SnapshotLibrary/Storage.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/SnapshotLibrary/Storage.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/Storage.class\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/Storage.class\" afterDir=\"false\" />\n    </list>\n    <list id=\"db76312a-c781-498c-9c6b-f9e009619aa3\" name=\"Changes by caser\" comment=\"\" />\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\n  </component>\n  <component name=\"FileTemplateManagerImpl\">\n    <option name=\"RECENT_TEMPLATES\">\n      <list>\n        <option value=\"Tag Library Descriptor\" />\n        <option value=\"Interface\" />\n        <option value=\"Class\" />\n      </list>\n    </option>\n  </component>\n  <component name=\"Git.Settings\">\n    <option name=\"RECENT_BRANCH_BY_REPOSITORY\">\n      <map>\n        <entry key=\"$PROJECT_DIR$\" value=\"master\" />\n      </map>\n    </option>\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\n  </component>\n  <component name=\"GitHubPullRequestSearchHistory\">{\n  &quot;lastFilter&quot;: {\n    &quot;state&quot;: &quot;OPEN&quot;\n  }\n}</component>\n  <component name=\"GithubPullRequestsUISettings\">\n    <option name=\"selectedUrlAndAccountId\">\n      <UrlAndAccount>\n        <option name=\"accountId\" value=\"8f50a126-4f1b-4332-af79-dfab72d0446c\" />\n        <option name=\"url\" value=\"https://github.com/andreasbrummer/DS_Snapshot.git\" />\n      </UrlAndAccount>\n    </option>\n  </component>\n  <component name=\"MarkdownSettingsMigration\">\n    <option name=\"stateVersion\" value=\"1\" />\n  </component>\n  <component name=\"MavenImportPreferences\">\n    <option name=\"generalSettings\">\n      <MavenGeneralSettings>\n        <option name=\"useMavenConfig\" value=\"true\" />\n      </MavenGeneralSettings>\n    </option>\n  </component>\n  <component name=\"ProblemsViewState\">\n    <option name=\"selectedTabId\" value=\"ProjectErrors\" />\n  </component>\n  <component name=\"ProjectId\" id=\"2Mv7TxseNnSRH2Fi9zPz0pHUdhy\" />\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\" />\n  <component name=\"ProjectViewState\">\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\n    <option name=\"showLibraryContents\" value=\"true\" />\n  </component>\n  <component name=\"PropertiesComponent\">{\n  &quot;keyToString&quot;: {\n    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,\n    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,\n    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,\n    &quot;TODO_SCOPE&quot;: &quot;All Places&quot;,\n    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,\n    &quot;last_opened_file_path&quot;: &quot;C:/Users/caser/Prova&quot;,\n    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,\n    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,\n    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,\n    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,\n    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,\n    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,\n    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,\n    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,\n    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.completion&quot;,\n    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;\n  }\n}</component>\n  <component name=\"RecentsManager\">\n    <key name=\"CopyFile.RECENT_KEYS\">\n      <recent name=\"$PROJECT_DIR$\" />\n      <recent name=\"$PROJECT_DIR$/src\" />\n    </key>\n    <key name=\"MoveFile.RECENT_KEYS\">\n      <recent name=\"$PROJECT_DIR$/src\" />\n      <recent name=\"$PROJECT_DIR$/src/SnapshotLibrary\" />\n      <recent name=\"$PROJECT_DIR$\" />\n    </key>\n    <key name=\"CopyClassDialog.RECENTS_KEY\">\n      <recent name=\"\" />\n    </key>\n  </component>\n  <component name=\"RunManager\" selected=\"Application.App2\">\n    <configuration name=\"App1\" type=\"Application\" factoryName=\"Application\" singleton=\"false\">\n      <option name=\"MAIN_CLASS_NAME\" value=\"SenderMessageTest\" />\n      <module name=\"DS_Snapshot\" />\n      <option name=\"PROGRAM_PARAMETERS\" value=\"0\" />\n      <option name=\"WORKING_DIRECTORY\" value=\"$USER_HOME$/Prova\" />\n      <method v=\"2\">\n        <option name=\"Make\" enabled=\"true\" />\n      </method>\n    </configuration>\n    <configuration name=\"App2\" type=\"Application\" factoryName=\"Application\" singleton=\"false\">\n      <option name=\"MAIN_CLASS_NAME\" value=\"SenderMessageTest\" />\n      <module name=\"DS_Snapshot\" />\n      <option name=\"PROGRAM_PARAMETERS\" value=\"1\" />\n      <option name=\"WORKING_DIRECTORY\" value=\"$USER_HOME$/Prova\" />\n      <method v=\"2\" />\n    </configuration>\n    <configuration name=\"Prova2\" type=\"Application\" factoryName=\"Application\" folderName=\"New Folder\">\n      <option name=\"MAIN_CLASS_NAME\" value=\"SenderMessageTest\" />\n      <module name=\"DS_Snapshot\" />\n      <option name=\"PROGRAM_PARAMETERS\" value=\"1\" />\n      <method v=\"2\">\n        <option name=\"Make\" enabled=\"true\" />\n      </method>\n    </configuration>\n    <list>\n      <item itemvalue=\"Application.Prova2\" />\n      <item itemvalue=\"Application.App1\" />\n      <item itemvalue=\"Application.App2\" />\n    </list>\n  </component>\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\n  <component name=\"TaskManager\">\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\n      <changelist id=\"b20208bd-06e1-44f6-9d53-78bb3d314151\" name=\"Changes\" comment=\"\" />\n      <created>1678636215082</created>\n      <option name=\"number\" value=\"Default\" />\n      <option name=\"presentableId\" value=\"Default\" />\n      <updated>1678636215082</updated>\n      <workItem from=\"1678636216222\" duration=\"16951000\" />\n      <workItem from=\"1678654071753\" duration=\"1690000\" />\n      <workItem from=\"1678866415385\" duration=\"466000\" />\n      <workItem from=\"1678901562944\" duration=\"8759000\" />\n      <workItem from=\"1679666526397\" duration=\"1155000\" />\n      <workItem from=\"1679668780782\" duration=\"11145000\" />\n    </task>\n    <task id=\"LOCAL-00001\" summary=\"First commit\">\n      <created>1678636834719</created>\n      <option name=\"number\" value=\"00001\" />\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1678636834719</updated>\n    </task>\n    <task id=\"LOCAL-00002\" summary=\"Aggiunto pom.xml\">\n      <created>1678637913171</created>\n      <option name=\"number\" value=\"00002\" />\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1678637913171</updated>\n    </task>\n    <task id=\"LOCAL-00003\" summary=\"aggiunta la logica\">\n      <created>1678643342346</created>\n      <option name=\"number\" value=\"00003\" />\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1678643342347</updated>\n    </task>\n    <task id=\"LOCAL-00004\" summary=\"aggiunta la logica\">\n      <created>1678648250873</created>\n      <option name=\"number\" value=\"00004\" />\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1678648250873</updated>\n    </task>\n    <task id=\"LOCAL-00005\" summary=\"modificato il main\">\n      <created>1678650189328</created>\n      <option name=\"number\" value=\"00005\" />\n      <option name=\"presentableId\" value=\"LOCAL-00005\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1678650189328</updated>\n    </task>\n    <task id=\"LOCAL-00006\" summary=\"aggiunto startSnapshot\">\n      <created>1678652577369</created>\n      <option name=\"number\" value=\"00006\" />\n      <option name=\"presentableId\" value=\"LOCAL-00006\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1678652577369</updated>\n    </task>\n    <task id=\"LOCAL-00007\" summary=\"Uno snapshot funziona\">\n      <created>1678653689540</created>\n      <option name=\"number\" value=\"00007\" />\n      <option name=\"presentableId\" value=\"LOCAL-00007\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1678653689540</updated>\n    </task>\n    <task id=\"LOCAL-00008\" summary=\"Improved testing, added multisnapshot and improved the code\">\n      <created>1678993163641</created>\n      <option name=\"number\" value=\"00008\" />\n      <option name=\"presentableId\" value=\"LOCAL-00008\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1678993163641</updated>\n    </task>\n    <task id=\"LOCAL-00009\" summary=\"MyListener&#10;MyState &#10;added\">\n      <created>1679043804378</created>\n      <option name=\"number\" value=\"00009\" />\n      <option name=\"presentableId\" value=\"LOCAL-00009\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1679043804378</updated>\n    </task>\n    <option name=\"localTasksCounter\" value=\"10\" />\n    <servers />\n  </component>\n  <component name=\"TypeScriptGeneratedFilesManager\">\n    <option name=\"version\" value=\"3\" />\n  </component>\n  <component name=\"Vcs.Log.Tabs.Properties\">\n    <option name=\"TAB_STATES\">\n      <map>\n        <entry key=\"MAIN\">\n          <value>\n            <State>\n              <option name=\"CUSTOM_BOOLEAN_PROPERTIES\">\n                <map>\n                  <entry key=\"Show.Git.Branches\" value=\"true\" />\n                </map>\n              </option>\n              <option name=\"FILTERS\">\n                <map>\n                  <entry key=\"branch\">\n                    <value>\n                      <list>\n                        <option value=\"MultiSnapShot\" />\n                      </list>\n                    </value>\n                  </entry>\n                </map>\n              </option>\n            </State>\n          </value>\n        </entry>\n      </map>\n    </option>\n  </component>\n  <component name=\"VcsManagerConfiguration\">\n    <MESSAGE value=\"First commit\" />\n    <MESSAGE value=\"Aggiunto pom.xml\" />\n    <MESSAGE value=\"implementata la logica\" />\n    <MESSAGE value=\"aggiunta la logica\" />\n    <MESSAGE value=\"modificato il main\" />\n    <MESSAGE value=\"aggiunto startSnapshot\" />\n    <MESSAGE value=\"Uno snapshot funziona\" />\n    <MESSAGE value=\"Improved testing, added multisnapshot and improved the code\" />\n    <MESSAGE value=\"MyListener&#10;MyState &#10;added\" />\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"MyListener&#10;MyState &#10;added\" />\n  </component>\n  <component name=\"XDebuggerManager\">\n    <breakpoint-manager>\n      <breakpoints>\n        <breakpoint enabled=\"true\" type=\"java-exception\">\n          <properties class=\"java.net.SocketException\" package=\"java.net\" />\n          <option name=\"timeStamp\" value=\"1\" />\n        </breakpoint>\n      </breakpoints>\n    </breakpoint-manager>\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision c3d0026f640098840afedf4b3d89181918cb05d1)
++++ b/.idea/workspace.xml	(date 1683054791134)
+@@ -5,18 +5,31 @@
+   </component>
+   <component name="ChangeListManager">
+     <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="MyListener&#10;MyState &#10;added">
++      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__commons_logging_commons_logging_1_1_3.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__jakarta_annotation_jakarta_annotation_api_1_3_5.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__jakarta_ws_rs_jakarta_ws_rs_api_2_1_6.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__log4j_log4j_1_2_17.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_commons_commons_collections4_4_4.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_commons_commons_lang3_3_12_0.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apiguardian_apiguardian_api_1_1_2.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_checkerframework_checker_qual_3_5_0.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_hk2_external_jakarta_inject_2_6_1.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_hk2_osgi_resource_locator_1_0_3.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_jersey_core_jersey_common_2_34.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_junit_jupiter_junit_jupiter_api_5_9_0_M1.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_junit_platform_junit_platform_commons_1_9_0_M1.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_opentest4j_opentest4j_1_2_0.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_slf4j_slf4j_api_1_7_33.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_slf4j_slf4j_log4j12_1_8_0_beta4.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_slf4j_slf4j_simple_2_0_0_alpha1.xml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/MyListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/MyListener.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/MyState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/MyState.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/DS_Snapshot.iml" beforeDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/SenderMessageTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SenderMessageTest.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/MessageListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/MessageListener.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/State.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/State.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/Storage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Storage.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Storage.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Storage.class" afterDir="false" />
+     </list>
+     <list id="db76312a-c781-498c-9c6b-f9e009619aa3" name="Changes by caser" comment="" />
+     <option name="SHOW_DIALOG" value="false" />
+@@ -80,7 +93,7 @@
+     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+     &quot;TODO_SCOPE&quot;: &quot;All Places&quot;,
+     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+-    &quot;last_opened_file_path&quot;: &quot;C:/Users/caser/Prova&quot;,
++    &quot;last_opened_file_path&quot;: &quot;/home/andreas/Desktop/DS/Prova&quot;,
+     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+@@ -112,7 +125,7 @@
+       <option name="MAIN_CLASS_NAME" value="SenderMessageTest" />
+       <module name="DS_Snapshot" />
+       <option name="PROGRAM_PARAMETERS" value="0" />
+-      <option name="WORKING_DIRECTORY" value="$USER_HOME$/Prova" />
++      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../Prova" />
+       <method v="2">
+         <option name="Make" enabled="true" />
+       </method>
+@@ -121,7 +134,7 @@
+       <option name="MAIN_CLASS_NAME" value="SenderMessageTest" />
+       <module name="DS_Snapshot" />
+       <option name="PROGRAM_PARAMETERS" value="1" />
+-      <option name="WORKING_DIRECTORY" value="$USER_HOME$/Prova" />
++      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../Prova" />
+       <method v="2" />
+     </configuration>
+     <configuration name="Prova2" type="Application" factoryName="Application" folderName="New Folder">
+@@ -150,8 +163,7 @@
+       <workItem from="1678654071753" duration="1690000" />
+       <workItem from="1678866415385" duration="466000" />
+       <workItem from="1678901562944" duration="8759000" />
+-      <workItem from="1679666526397" duration="1155000" />
+-      <workItem from="1679668780782" duration="11145000" />
++      <workItem from="1683018965128" duration="12784000" />
+     </task>
+     <task id="LOCAL-00001" summary="First commit">
+       <created>1678636834719</created>
+@@ -238,7 +250,7 @@
+                   <entry key="branch">
+                     <value>
+                       <list>
+-                        <option value="MultiSnapShot" />
++                        <option value="origin/MultiSnapShot-withLISTENER" />
+                       </list>
+                     </value>
+                   </entry>
