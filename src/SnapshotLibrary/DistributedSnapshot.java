@@ -63,7 +63,7 @@ public class DistributedSnapshot{
 
     /*  only for testing
         delay (in milliseconds) before a snapshot is started */
-    static final int SNAPSHOT_START_DELAY_MS = 2000;
+    static final int SNAPSHOT_START_DELAY_MS = 7000;
 
     /*  only for testing */
     static final boolean TEST_MODE = true;
@@ -131,10 +131,14 @@ public class DistributedSnapshot{
         UUID id = UUID.fromString(node_id);
         Socket socket = outputNodes.get(id);
         ObjectOutputStream objectOutput = outputStream.get(id);
-        objectOutput.close();
-        socket.close();
-        outputNodes.remove(id);
-        outputStream.remove(id);
+        try {
+            objectOutput.close();
+            socket.close();
+            outputNodes.remove(id);
+            outputStream.remove(id);
+        } catch (NullPointerException e) {
+            LOGGER.error("No connection with : " + socket);
+        }
 
         LOGGER.info("Connection closed with: " + socket.getInetAddress() + " port: " + socket.getPort());
     }

@@ -28,6 +28,8 @@ public class SenderMessageTest{
     private static final String CLOSE_CONNECTION = "close";
     private static int serverPort1 = 24071;
     private static int serverPort2 = 24079;
+
+    private static final String REMOTE_IP = "192.168.6.51";
     public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
 
         DistributedSnapshot distrSnap = null;
@@ -66,7 +68,7 @@ public class SenderMessageTest{
         }
 
 
-        InetAddress ipAddress = InetAddress.getByName("127.0.0.1");
+        InetAddress ipAddress = InetAddress.getByName(REMOTE_IP);
         String serverAddress = distrSnap.installNewConnectionToNode(ipAddress, (nodeId == 0) ? serverPort2 : serverPort1);
         String folderPath= (nodeId == 0 ? "Snapshot1" : "Snapshot2");
 
@@ -116,14 +118,14 @@ public class SenderMessageTest{
             logSum(sum, nodeId);
         });
         executor.shutdown();
-        new Thread(() -> {
-            try {
-                Thread.sleep(rand.nextInt(10000) );
-                distrSnap.startSnapshot();
-            } catch (InterruptedException | IOException e) {
-                throw new RuntimeException(e);
-            }
-        }).start();
+        //new Thread(() -> {
+        //    try {
+         //       Thread.sleep(rand.nextInt(10000) );
+       //         distrSnap.startSnapshot();
+        //    } catch (InterruptedException | IOException e) {
+        //        throw new RuntimeException(e);
+          //  }
+        //}).start();
     }
     private static void logState(int nodeId, MyState state) {
         Logger.getLogger("SendereMessageTest" + nodeId + 1).info("Stato attuale: " + state.getState());
@@ -132,9 +134,9 @@ public class SenderMessageTest{
         Logger.getLogger("SendereMessageTest" + nodeId + 1).info("Somma attuale: " + sum);
     }
     public static void openConnection(String ServerAddress,DistributedSnapshot distrSnap, int nodeId) throws IOException {
-        Logger.getLogger("SendereMessageTest").info("Opening connection to " + InetAddress.getByName("127.0.0.1"));
+        Logger.getLogger("SendereMessageTest").info("Opening connection to " + InetAddress.getByName(REMOTE_IP));
         try {
-        distrSnap.reconnectToNode(ServerAddress,InetAddress.getByName("127.0.0.1"), (nodeId == 0) ? serverPort2 : serverPort1);
+        distrSnap.reconnectToNode(ServerAddress,InetAddress.getByName(REMOTE_IP), (nodeId == 0) ? serverPort2 : serverPort1);
         } catch (ConnectException e) {
             Logger.getLogger("SendereMessageTest").warning("Connection refused");
         }
