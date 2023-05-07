@@ -1,0 +1,21 @@
+Index: src/SnapshotLibrary/SenderMessageTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package SnapshotLibrary;\r\n\r\nimport SnapshotLibrary.Messages.Marker;\r\n\r\nimport java.io.BufferedReader;\r\nimport java.io.IOException;\r\nimport java.io.InputStreamReader;\r\nimport java.net.InetAddress;\r\nimport java.util.LinkedHashMap;\r\nimport java.util.UUID;\r\n\r\npublic class SenderMessageTest {\r\n    public static void main(String[] args) throws IOException {\r\n        DistributedSnapshot ds = new DistributedSnapshot();\r\n        ds.init();\r\n\r\n\r\n        InetAddress ipAddress = InetAddress.getByName(\"192.168.121.239\");\r\n        int port = 43731; //harcodare qui la porta del nodo server\r\n        String node1 = ds.installNewConnectionToNode(ipAddress,port );\r\n        System.out.println(\"Connessione installata\");\r\n\r\n        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));\r\n        while (true) {\r\n                System.out.print(\"Inserisci l'oggetto da inviare: \");\r\n                // Qui si assume che l'oggetto sia di tipo String, ma è possibile utilizzare qualsiasi altro tipo di oggetto\r\n                Object object = reader.readLine();\r\n                if(object.equals(\"marker\")){\r\n                    object = new Marker(UUID.randomUUID());\r\n\r\n                }\r\n                ds.sendMessage(node1,object);\r\n      }\r\n    }\r\n}\r\n//        try {\r\n//            // Creazione del socket e connessione all'indirizzo IP e alla porta specificati\r\n//            InetAddress ipAddress = InetAddress.getByName(\"192.168.121.51\");\r\n//            int port = 43462; //harcodare qui la porta del nodo server\r\n//            Socket socket = new Socket(ipAddress, port);\r\n//\r\n//            // Preparazione dei buffer di input e output\r\n//            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));\r\n//            ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());\r\n//\r\n//            // Ciclo while infinito per leggere l'oggetto dalla tastiera e inviarlo tramite socket\r\n//            while (true) {\r\n//                System.out.print(\"Inserisci l'oggetto da inviare: \");\r\n//                // Qui si assume che l'oggetto sia di tipo String, ma è possibile utilizzare qualsiasi altro tipo di oggetto\r\n//                String object = reader.readLine();\r\n//                objectOutput.writeObject(object);\r\n//            }\r\n//        } catch (IOException e) {\r\n//            System.out.println(\"Errore durante la connessione al server: \" + e.getMessage());\r\n//        }\r\n//    }\r\n//}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/SnapshotLibrary/SenderMessageTest.java b/src/SnapshotLibrary/SenderMessageTest.java
+--- a/src/SnapshotLibrary/SenderMessageTest.java	(revision 07d8a70d33e518e18b38bf5d133b2c3bff6e170e)
++++ b/src/SnapshotLibrary/SenderMessageTest.java	(date 1678648125842)
+@@ -15,8 +15,8 @@
+         ds.init();
+ 
+ 
+-        InetAddress ipAddress = InetAddress.getByName("192.168.121.239");
+-        int port = 43731; //harcodare qui la porta del nodo server
++        InetAddress ipAddress = InetAddress.getByName("192.168.1.17");
++        int port = 39985; //harcodare qui la porta del nodo server
+         String node1 = ds.installNewConnectionToNode(ipAddress,port );
+         System.out.println("Connessione installata");
+ 

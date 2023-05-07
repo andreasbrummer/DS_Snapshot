@@ -1,0 +1,127 @@
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"b20208bd-06e1-44f6-9d53-78bb3d314151\" name=\"Changes\" comment=\"MyListener&#10;MyState &#10;added\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/MyListener.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/MyListener.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/MyState.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/MyState.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/SenderMessageTest.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/SenderMessageTest.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/SnapshotLibrary/MessageListener.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/SnapshotLibrary/MessageListener.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/SnapshotLibrary/State.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/SnapshotLibrary/State.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/SnapshotLibrary/Storage.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/SnapshotLibrary/Storage.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/Storage.class\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/target/classes/SnapshotLibrary/Storage.class\" afterDir=\"false\" />\r\n    </list>\r\n    <list id=\"db76312a-c781-498c-9c6b-f9e009619aa3\" name=\"Changes by caser\" comment=\"\" />\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Tag Library Descriptor\" />\r\n        <option value=\"Interface\" />\r\n        <option value=\"Class\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_BRANCH_BY_REPOSITORY\">\r\n      <map>\r\n        <entry key=\"$PROJECT_DIR$\" value=\"master\" />\r\n      </map>\r\n    </option>\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"GitHubPullRequestSearchHistory\">{\r\n  &quot;lastFilter&quot;: {\r\n    &quot;state&quot;: &quot;OPEN&quot;\r\n  }\r\n}</component>\r\n  <component name=\"GithubPullRequestsUISettings\">\r\n    <option name=\"selectedUrlAndAccountId\">\r\n      <UrlAndAccount>\r\n        <option name=\"accountId\" value=\"8f50a126-4f1b-4332-af79-dfab72d0446c\" />\r\n        <option name=\"url\" value=\"https://github.com/andreasbrummer/DS_Snapshot.git\" />\r\n      </UrlAndAccount>\r\n    </option>\r\n  </component>\r\n  <component name=\"MarkdownSettingsMigration\">\r\n    <option name=\"stateVersion\" value=\"1\" />\r\n  </component>\r\n  <component name=\"MavenImportPreferences\">\r\n    <option name=\"generalSettings\">\r\n      <MavenGeneralSettings>\r\n        <option name=\"useMavenConfig\" value=\"true\" />\r\n      </MavenGeneralSettings>\r\n    </option>\r\n  </component>\r\n  <component name=\"ProblemsViewState\">\r\n    <option name=\"selectedTabId\" value=\"CurrentFile\" />\r\n  </component>\r\n  <component name=\"ProjectId\" id=\"2Mv7TxseNnSRH2Fi9zPz0pHUdhy\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">{\r\n  &quot;keyToString&quot;: {\r\n    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,\r\n    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,\r\n    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,\r\n    &quot;TODO_SCOPE&quot;: &quot;All Places&quot;,\r\n    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,\r\n    &quot;last_opened_file_path&quot;: &quot;C:/Users/caser/Prova&quot;,\r\n    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,\r\n    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,\r\n    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,\r\n    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,\r\n    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,\r\n    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,\r\n    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,\r\n    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,\r\n    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.completion&quot;,\r\n    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;\r\n  }\r\n}</component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"CopyFile.RECENT_KEYS\">\r\n      <recent name=\"$PROJECT_DIR$\" />\r\n      <recent name=\"$PROJECT_DIR$/src\" />\r\n    </key>\r\n    <key name=\"MoveFile.RECENT_KEYS\">\r\n      <recent name=\"$PROJECT_DIR$/src\" />\r\n      <recent name=\"$PROJECT_DIR$/src/SnapshotLibrary\" />\r\n      <recent name=\"$PROJECT_DIR$\" />\r\n    </key>\r\n    <key name=\"CopyClassDialog.RECENTS_KEY\">\r\n      <recent name=\"\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\" selected=\"Application.App1\">\r\n    <configuration name=\"App1\" type=\"Application\" factoryName=\"Application\" singleton=\"false\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"SenderMessageTest\" />\r\n      <module name=\"DS_Snapshot\" />\r\n      <option name=\"PROGRAM_PARAMETERS\" value=\"0\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"$USER_HOME$/Prova\" />\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"App2\" type=\"Application\" factoryName=\"Application\" singleton=\"false\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"SenderMessageTest\" />\r\n      <module name=\"DS_Snapshot\" />\r\n      <option name=\"PROGRAM_PARAMETERS\" value=\"1\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"$USER_HOME$/Prova\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"Prova2\" type=\"Application\" factoryName=\"Application\" folderName=\"New Folder\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"SenderMessageTest\" />\r\n      <module name=\"DS_Snapshot\" />\r\n      <option name=\"PROGRAM_PARAMETERS\" value=\"1\" />\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <list>\r\n      <item itemvalue=\"Application.Prova2\" />\r\n      <item itemvalue=\"Application.App1\" />\r\n      <item itemvalue=\"Application.App2\" />\r\n    </list>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"b20208bd-06e1-44f6-9d53-78bb3d314151\" name=\"Changes\" comment=\"\" />\r\n      <created>1678636215082</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1678636215082</updated>\r\n      <workItem from=\"1678636216222\" duration=\"16951000\" />\r\n      <workItem from=\"1678654071753\" duration=\"1690000\" />\r\n      <workItem from=\"1678866415385\" duration=\"466000\" />\r\n      <workItem from=\"1678901562944\" duration=\"8759000\" />\r\n      <workItem from=\"1679666526397\" duration=\"1155000\" />\r\n      <workItem from=\"1679668780782\" duration=\"11814000\" />\r\n      <workItem from=\"1679681867979\" duration=\"49000\" />\r\n      <workItem from=\"1682607024585\" duration=\"5107000\" />\r\n      <workItem from=\"1683020446344\" duration=\"12105000\" />\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"First commit\">\r\n      <created>1678636834719</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1678636834719</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00002\" summary=\"Aggiunto pom.xml\">\r\n      <created>1678637913171</created>\r\n      <option name=\"number\" value=\"00002\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1678637913171</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00003\" summary=\"aggiunta la logica\">\r\n      <created>1678643342346</created>\r\n      <option name=\"number\" value=\"00003\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1678643342347</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00004\" summary=\"aggiunta la logica\">\r\n      <created>1678648250873</created>\r\n      <option name=\"number\" value=\"00004\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1678648250873</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00005\" summary=\"modificato il main\">\r\n      <created>1678650189328</created>\r\n      <option name=\"number\" value=\"00005\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00005\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1678650189328</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00006\" summary=\"aggiunto startSnapshot\">\r\n      <created>1678652577369</created>\r\n      <option name=\"number\" value=\"00006\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00006\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1678652577369</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00007\" summary=\"Uno snapshot funziona\">\r\n      <created>1678653689540</created>\r\n      <option name=\"number\" value=\"00007\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00007\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1678653689540</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00008\" summary=\"Improved testing, added multisnapshot and improved the code\">\r\n      <created>1678993163641</created>\r\n      <option name=\"number\" value=\"00008\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00008\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1678993163641</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00009\" summary=\"MyListener&#10;MyState &#10;added\">\r\n      <created>1679043804378</created>\r\n      <option name=\"number\" value=\"00009\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00009\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1679043804378</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00010\" summary=\"MyListener&#10;MyState &#10;added\">\r\n      <created>1679680760833</created>\r\n      <option name=\"number\" value=\"00010\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00010\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1679680760833</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"11\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State>\r\n              <option name=\"CUSTOM_BOOLEAN_PROPERTIES\">\r\n                <map>\r\n                  <entry key=\"Show.Git.Branches\" value=\"true\" />\r\n                </map>\r\n              </option>\r\n              <option name=\"FILTERS\">\r\n                <map>\r\n                  <entry key=\"branch\">\r\n                    <value>\r\n                      <list>\r\n                        <option value=\"origin/MultiSnapShot-withLISTENER\" />\r\n                      </list>\r\n                    </value>\r\n                  </entry>\r\n                </map>\r\n              </option>\r\n            </State>\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"First commit\" />\r\n    <MESSAGE value=\"Aggiunto pom.xml\" />\r\n    <MESSAGE value=\"implementata la logica\" />\r\n    <MESSAGE value=\"aggiunta la logica\" />\r\n    <MESSAGE value=\"modificato il main\" />\r\n    <MESSAGE value=\"aggiunto startSnapshot\" />\r\n    <MESSAGE value=\"Uno snapshot funziona\" />\r\n    <MESSAGE value=\"Improved testing, added multisnapshot and improved the code\" />\r\n    <MESSAGE value=\"MyListener&#10;MyState &#10;added\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"MyListener&#10;MyState &#10;added\" />\r\n  </component>\r\n  <component name=\"XDebuggerManager\">\r\n    <breakpoint-manager>\r\n      <breakpoints>\r\n        <breakpoint enabled=\"true\" type=\"java-exception\">\r\n          <properties class=\"java.net.SocketException\" package=\"java.net\" />\r\n          <option name=\"timeStamp\" value=\"1\" />\r\n        </breakpoint>\r\n      </breakpoints>\r\n    </breakpoint-manager>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 58b8395641b2c05b257116ecfd28d051fc3dac53)
++++ b/.idea/workspace.xml	(date 1683107787681)
+@@ -4,19 +4,14 @@
+     <option name="autoReloadType" value="SELECTIVE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="MyListener&#10;MyState &#10;added">
++    <list default="true" id="b20208bd-06e1-44f6-9d53-78bb3d314151" name="Changes" comment="Connections problems fixed">
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/MyListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/MyListener.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/MyState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/MyState.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/SenderMessageTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SenderMessageTest.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/DistributedSnapshot.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/MessageListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/MessageListener.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/State.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/State.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/SnapshotLibrary/Storage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SnapshotLibrary/Storage.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$NodeHandler.class" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot$Server.class" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/DistributedSnapshot.class" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Storage.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SnapshotLibrary/Storage.class" afterDir="false" />
+     </list>
+     <list id="db76312a-c781-498c-9c6b-f9e009619aa3" name="Changes by caser" comment="" />
+     <option name="SHOW_DIALOG" value="false" />
+@@ -73,26 +68,26 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent">{
+-  &quot;keyToString&quot;: {
+-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+-    &quot;TODO_SCOPE&quot;: &quot;All Places&quot;,
+-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+-    &quot;last_opened_file_path&quot;: &quot;C:/Users/caser/Prova&quot;,
+-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+-    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.completion&quot;,
+-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
++  <component name="PropertiesComponent"><![CDATA[{
++  "keyToString": {
++    "RunOnceActivity.OpenProjectViewOnStart": "true",
++    "RunOnceActivity.ShowReadmeOnStart": "true",
++    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
++    "TODO_SCOPE": "All Places",
++    "WebServerToolWindowFactoryState": "false",
++    "last_opened_file_path": "/home/andreas/Desktop/DS/Prova",
++    "node.js.detected.package.eslint": "true",
++    "node.js.detected.package.tslint": "true",
++    "node.js.selected.package.eslint": "(autodetect)",
++    "node.js.selected.package.tslint": "(autodetect)",
++    "nodejs_package_manager_path": "npm",
++    "project.structure.last.edited": "Modules",
++    "project.structure.proportion": "0.15",
++    "project.structure.side.proportion": "0.2",
++    "settings.editor.selected.configurable": "editor.preferences.completion",
++    "vue.rearranger.settings.migration": "true"
+   }
+-}</component>
++}]]></component>
+   <component name="RecentsManager">
+     <key name="CopyFile.RECENT_KEYS">
+       <recent name="$PROJECT_DIR$" />
+@@ -107,12 +102,12 @@
+       <recent name="" />
+     </key>
+   </component>
+-  <component name="RunManager" selected="Application.App1">
++  <component name="RunManager" selected="Application.App2">
+     <configuration name="App1" type="Application" factoryName="Application" singleton="false">
+       <option name="MAIN_CLASS_NAME" value="SenderMessageTest" />
+       <module name="DS_Snapshot" />
+       <option name="PROGRAM_PARAMETERS" value="0" />
+-      <option name="WORKING_DIRECTORY" value="$USER_HOME$/Prova" />
++      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../Prova" />
+       <method v="2">
+         <option name="Make" enabled="true" />
+       </method>
+@@ -121,7 +116,7 @@
+       <option name="MAIN_CLASS_NAME" value="SenderMessageTest" />
+       <module name="DS_Snapshot" />
+       <option name="PROGRAM_PARAMETERS" value="1" />
+-      <option name="WORKING_DIRECTORY" value="$USER_HOME$/Prova" />
++      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../Prova" />
+       <method v="2" />
+     </configuration>
+     <configuration name="Prova2" type="Application" factoryName="Application" folderName="New Folder">
+@@ -226,7 +221,14 @@
+       <option name="project" value="LOCAL" />
+       <updated>1679680760833</updated>
+     </task>
+-    <option name="localTasksCounter" value="11" />
++    <task id="LOCAL-00011" summary="Connections problems fixed">
++      <created>1683064955651</created>
++      <option name="number" value="00011" />
++      <option name="presentableId" value="LOCAL-00011" />
++      <option name="project" value="LOCAL" />
++      <updated>1683064955651</updated>
++    </task>
++    <option name="localTasksCounter" value="12" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+@@ -270,7 +272,8 @@
+     <MESSAGE value="Uno snapshot funziona" />
+     <MESSAGE value="Improved testing, added multisnapshot and improved the code" />
+     <MESSAGE value="MyListener&#10;MyState &#10;added" />
+-    <option name="LAST_COMMIT_MESSAGE" value="MyListener&#10;MyState &#10;added" />
++    <MESSAGE value="Connections problems fixed" />
++    <option name="LAST_COMMIT_MESSAGE" value="Connections problems fixed" />
+   </component>
+   <component name="XDebuggerManager">
+     <breakpoint-manager>
